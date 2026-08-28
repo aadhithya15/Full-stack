@@ -162,3 +162,253 @@ html,body,#root{max-width:100%;overflow-x:hidden}
 .compare-favourite{align-self:flex-start;margin:0 15px 15px;border:1px solid #536486;background:transparent;color:#d9e3ff;border-radius:99px;padding:8px 10px;font:500 9px var(--sans);cursor:pointer}
 @media(max-width:1050px){.compare-live-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.compare-live-grid{grid-template-columns:1fr}.compare-live-card .palette-visual{height:390px}}
+
+/* New culture, formality, and age controls */
+.style-option-grid input{display:block;width:100%;margin-top:7px;border:0;border-bottom:1px solid #59637b;background:#080c14;color:#edf1ff;padding:10px 0;outline:0;font:400 14px var(--sans)}
+.style-option-grid input:focus{border-color:#a7b9ff}
+.age-field small{display:block;margin-top:7px;color:#8792ad;font:400 9px var(--sans);letter-spacing:0}
+
+/* SOUTH INDIAN TRADITIONAL UI SYSTEM */
+:root{--ink:#251317;--paper:#f6efe3;--acid:#d4aa58;--line:#5a3435;--muted:#b9a39a;--serif:'Playfair Display',Georgia,serif;--sans:'DM Sans',Arial,sans-serif;--mono:'DM Mono',monospace}
+body{background:#251317;color:#f7f0e5}
+.site-header{background:#fbf4e8;color:#2b1719;border-bottom:1px solid #ddc9a7}
+.wordmark{color:#2b1719}.wordmark i{background:#762d36;color:#f9edcf;border-radius:4px;transform:rotate(45deg)}.wordmark i:after{color:#f9edcf}
+.nav-items a{color:#5d3537}.nav-items .nav-button{background:#762d36;border-color:#762d36;color:#fff5df}.nav-items .nav-button:hover{background:#c18b35;border-color:#c18b35;color:#251317}.logout-link{color:#6a4242!important}
+.hero-v2.traditional-hero{background:radial-gradient(circle at 35% 35%,#713d3e 0,#35191f 46%,#180e13 100%);color:#fff6e6}.traditional-hero .hero-image{left:43%;right:5%;top:0;bottom:0;border-radius:0;clip-path:polygon(12% 0,100% 0,100% 100%,0 100%);opacity:.9}.traditional-hero .hero-image img{filter:brightness(.7) saturate(.9);object-position:center center}.traditional-hero .hero-vignette{background:linear-gradient(90deg,rgba(37,13,19,.92),rgba(37,13,19,.15) 70%),linear-gradient(0deg,rgba(33,10,17,.55),transparent 50%)}.traditional-hero .hero-topline{display:flex;color:#e6c98d;top:28px}.traditional-hero .hero-content{align-items:flex-start;text-align:left;padding-top:150px;width:min(1236px,calc(100% - 64px))}.traditional-hero .hero-reward{background:#f4e5c8;color:#3a1d21;border-color:#d6ad5c}.traditional-hero .hero-reward b{color:#8b5423}.traditional-hero .hero-content h1{font-family:var(--serif);font-weight:600;letter-spacing:-4px;color:#fff4df}.traditional-hero .hero-content h1 em{color:#e4b865;font-style:italic}.traditional-hero .hero-sub{color:#e7d5c1}.traditional-hero .hero-primary{background:#f6e8cc;color:#722d36}.traditional-hero .hero-primary:hover{background:#d3a34e;color:#281419}.traditional-hero .hero-side{display:block;color:#e4c884}
+.intro-v2{background:#f6efe3;color:#2b1719}.intro-title h2{color:#692c35}.intro-title h2 em{color:#b87d2c}.intro-title>p{color:#6f5550}.number-line{border-color:#a98778;color:#7a514b}
+.tool-chooser{background:#29151b;color:#f7eddc}.tool-chooser h2{color:#f8eddb}.tool-chooser h2 em{color:#d6aa58}.tool-chooser .section-top>span{color:#d9bd86}.choice{border-color:#725043;background:#3a1f25}.choice-overlay{background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(28,10,16,.86))}.choice-copy p{color:#e0b96e}.choice-copy h3{color:#fff0d8}.choice-copy small{color:#e2cdb7}.choice-arrow{background:#f4e5c8;color:#722d36;border-color:#f4e5c8}.choice:hover{outline:1px solid #e0b260;border-color:#e0b260}.choice:hover .choice-arrow{background:#d5a44f;color:#2b1719;border-color:#d5a44f}
+.process{background:#eadcca;color:#2b1719}.process h2{color:#692c35}.process h2 em{color:#a96b28}.process-grid:after{background:radial-gradient(ellipse,rgba(179,104,37,.42),rgba(111,39,49,.18) 45%,transparent 70%)}.process-steps article{border-color:#b99a84}.process-steps h3{color:#692c35}.process-steps p{color:#745b54}.under-link{border-color:#762d36;color:#632930}.orb{background:linear-gradient(160deg,#d7a84f,#7a2c3d);color:#fff5dc}
+.lookbook{background:#f8f0e4;color:#2b1719}.lookbook h2{color:#692c35}.lookbook h2 em{color:#b4792d}.lookbook .section-top>span,.look-head>p{color:#7b5a53}.look-photo{background:#d5bca2}.look-info>p{color:#8f542b}.look-info h3{color:#692c35}.look-info a{color:#762d36;border-color:#762d36}.swatches i{border-color:#8d6a55}
+.image-statement{background:#3b1b22}.image-statement:after{background:linear-gradient(90deg,rgba(43,14,20,.88),rgba(43,14,20,.1))}.statement-copy h2{color:#fff0d8}.statement-copy h2 em{color:#e0b15a}.pill-light{background:#f5e6ca;color:#762d36}.pill-light:hover{background:#d4a24d;color:#2b1719}
+.end-v2{background:#d4a24d;color:#2b1719}.end-v2 h2{color:#3d1c21}.end-v2 h2 em{color:#f3e0bc}.big-link{background:#3b1b22;color:#fff0d8}.big-link:hover{background:#672730}
+footer{background:#f8f0e4;color:#694744}footer .wordmark{color:#2b1719}footer .wide{border-color:#d9c2a4}
+.analyze-page,.dashboard-page,.utility,.quiz-page{background:#251317;color:#f6eddd}.analyze-heading,.form-section,.result-section,.result-columns,.quiz-controls,.saved-page-head,.closet-heading,.closet-toolbar{border-color:#5b3538}.analyze-heading h1,.result-page h1,.ai-loading h1,.quiz-content h1,.quiz-finish h1,.dashboard-page h1,.utility h1{color:#f3dfbc}.analyze-heading h1 em,.result-page h1 em,.ai-loading h1 em,.quiz-content h1 em,.quiz-finish h1 em{color:#d2a351}.form-title h2,.result-details h2,.dashboard-page h1,.utility h1{color:#f8ead2}.form-title>b,.field-label,.or-word>span,.result-label,.result-section>p,.result-columns p,.closet-fields label,.profile-card label{color:#d3a864}.form-title p,.analyze-heading>p:not(.micro),.description,.dash-copy,.saved-intro,.closet-heading>div>p:not(.micro),.quiz-hint{color:#c5a99b}.drop-zone,.or-word,.profile-card,.closet-form,.saved-grid-four .saved-look-card,.closet-real-card,.compare-live-card,.comparison{background:#351d24;border-color:#725044}.drop-zone:hover{background:#44252d;border-color:#d3a75d}.or-word input,.select-grid select,.style-option-grid select,.style-option-grid input,.notes textarea,.closet-fields input,.closet-fields select,.closet-toolbar input,.closet-toolbar select,.saved-toolbar input,.saved-toolbar select{color:#f9edda;border-color:#8b6558;background:transparent}.select-grid select option,.style-option-grid select option,.profile-card select option,.closet-fields option{background:#351d24;color:#fff0d8}.chip-row button,.tone-options button,.outfit-tabs button,.result-actions button,.result-actions a,.reset,.saved-grid-four .saved-card-copy button,.closet-item-copy button,.compare-favourite{border-color:#8b6253;background:transparent;color:#f1ddbd}.chip-row button:hover,.chip-row button.active,.tone-options button:hover,.tone-options button.active,.outfit-tabs button.on{background:#d5a452;border-color:#d5a452;color:#2b1719}.analyze-button,.quiz-primary,.profile-card button,.closet-add-button,.big-link{background:#f3e3c5;color:#762d36}.analyze-button:hover,.quiz-primary:not(:disabled):hover,.profile-card button:hover,.closet-add-button:hover{background:#d4a34f;color:#2b1719}.tip,.comparison,.ai-pick{background:#43252c;border-color:#855d54;color:#f0d9b7}.garment-grid article{background:#351d24;border-color:#765348}.garment-kind{color:#d2a456}.garment-grid strong{color:#f8ead5}.garment-grid small{color:#c9aa97}.saved-page-head h1 span,.closet-heading h1 span{color:#d4a451}.saved-stats strong{color:#f4dfba}.palette-visual{background:radial-gradient(circle at 75% 20%,var(--palette-c),transparent 23%),linear-gradient(140deg,var(--palette-a),var(--palette-b) 58%,#2b151c)}
+.profile-card select{background:#351d24;color:#f1dfc5;color-scheme:dark}.profile-card select option{background:#351d24;color:#fff0d8}
+@media(max-width:760px){.traditional-hero .hero-image{left:18px;right:18px;top:42px;bottom:50px;clip-path:none;opacity:.78}.traditional-hero .hero-content{padding-top:125px}.traditional-hero .hero-topline{display:none}.traditional-hero .hero-content h1{font-size:46px}.choice-grid{grid-template-columns:1fr 1fr}.choice{height:330px}.choice-copy h3{font-size:25px}.choice-copy small{display:none}}
+
+
+/* Tamil/Hindi typography safety: native glyphs need a little more line height
+   than Latin display fonts, otherwise hero copy can clip at section edges. */
+html[lang="ta"] body,html[lang="hi"] body{font-family:"Nirmala UI","Noto Sans Tamil","Noto Sans Devanagari",var(--sans)}
+html[lang="ta"] .traditional-hero,html[lang="hi"] .traditional-hero{height:700px;min-height:700px}
+html[lang="ta"] .traditional-hero .hero-content h1,html[lang="hi"] .traditional-hero .hero-content h1{font-family:"Nirmala UI","Noto Serif Tamil","Noto Serif Devanagari",Georgia,serif;font-size:clamp(38px,4.7vw,68px);line-height:1.13;letter-spacing:0;max-width:720px}
+html[lang="ta"] .traditional-hero .hero-sub,html[lang="hi"] .traditional-hero .hero-sub{font-family:"Nirmala UI","Noto Sans Tamil","Noto Sans Devanagari",var(--sans);font-size:15px;line-height:1.65;max-width:490px}
+html[lang="ta"] .intro-title h2,html[lang="hi"] .intro-title h2,html[lang="ta"] .tool-chooser h2,html[lang="hi"] .tool-chooser h2,html[lang="ta"] .process h2,html[lang="hi"] .process h2,html[lang="ta"] .lookbook h2,html[lang="hi"] .lookbook h2,html[lang="ta"] .statement-copy h2,html[lang="hi"] .statement-copy h2,html[lang="ta"] .end-v2 h2,html[lang="hi"] .end-v2 h2{font-family:"Nirmala UI","Noto Serif Tamil","Noto Serif Devanagari",Georgia,serif;letter-spacing:0;line-height:1.16}
+html[lang="ta"] .choice-copy h3,html[lang="hi"] .choice-copy h3,html[lang="ta"] .process-steps h3,html[lang="hi"] .process-steps h3,html[lang="ta"] .look-info h3,html[lang="hi"] .look-info h3,html[lang="ta"] .auth-art h1,html[lang="hi"] .auth-art h1{font-family:"Nirmala UI","Noto Serif Tamil","Noto Serif Devanagari",Georgia,serif;letter-spacing:0;line-height:1.2}
+@media(max-width:760px){html[lang="ta"] .traditional-hero,html[lang="hi"] .traditional-hero{height:720px;min-height:720px}html[lang="ta"] .traditional-hero .hero-content h1,html[lang="hi"] .traditional-hero .hero-content h1{font-size:39px;line-height:1.18}html[lang="ta"] .traditional-hero .hero-sub,html[lang="hi"] .traditional-hero .hero-sub{font-size:13px;line-height:1.65}}
+
+
+/* Traditional home tool cards: show the complete outfit/reference image and
+   preserve spaces when the editorial line break is hidden on desktop. */
+.choice{height:420px}
+.choice img{height:232px;object-fit:contain;object-position:center;background:#f5e9d6}
+.choice-overlay{background:linear-gradient(180deg,rgba(0,0,0,0),rgba(38,17,22,.08) 48%,#3a1f25 48%,#3a1f25)}
+.choice-copy{top:247px;bottom:auto}
+.choice-copy h3 span+span:before{content:' '}
+@media(max-width:760px){.choice{height:370px}.choice img{height:175px;object-fit:contain}.choice-copy{top:187px}.choice-copy h3 span+span:before{content:' '}}
+
+
+/* Auth screen: complete the image and use the previously empty panel area as
+   a restrained visual flow instead of leaving a blank white block. */
+.auth-art{background:#241318}
+.auth-art img{object-fit:contain;object-position:center;background:linear-gradient(145deg,#241318,#4c242b)}
+.auth-panel{display:flex;flex-direction:column}
+.auth-flow{width:min(430px,100%);margin:clamp(45px,8vh,90px) auto 0}
+.auth-flow-visual{height:145px;position:relative;overflow:hidden;border-radius:8px;background:#381d24;border:1px solid #d6b26a}
+.auth-flow-visual img{display:block;width:100%;height:100%;object-fit:cover;transition:transform .7s cubic-bezier(.17,.84,.25,1);filter:saturate(.82)}
+.auth-flow-visual:hover img{transform:scale(1.06)}
+.auth-flow-visual:after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,rgba(35,13,19,.88),rgba(35,13,19,.12) 75%);pointer-events:none}
+.auth-flow-visual>div{position:absolute;z-index:1;left:17px;bottom:16px;color:#fff1d8;display:flex;flex-direction:column;gap:6px}
+.auth-flow-visual span{font:500 8px var(--mono);letter-spacing:1px;color:#e1bc70}
+.auth-flow-visual strong{font:600 18px var(--serif);letter-spacing:-.3px}
+.auth-flow-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.auth-flow-steps article{display:flex;flex-direction:column;gap:5px;border-top:1px solid #c6a271;padding-top:9px;color:#694544}
+.auth-flow-steps b{font:500 8px var(--mono);color:#b17a2d}.auth-flow-steps strong{font:600 11px var(--sans);color:#3d2326}.auth-flow-steps small{font:400 9px/1.35 var(--sans);color:#866866}
+@media(max-width:700px){.auth-flow{margin-top:42px}.auth-flow-visual{height:125px}.auth-flow-steps{gap:6px}.auth-flow-steps strong{font-size:10px}.auth-flow-steps small{font-size:8px}}
+
+/* HUEFIT PAGE VISUALS FIX v4 (route-based)
+   Backgrounds now key off <body> classes set from the URL (/saved, /closet,
+   /profile...), so they work regardless of the class names inside App.jsx.
+   Saved -> veshti | Closet -> traditional wardrobe | Profile/Prefs -> saree ripple.
+   Analysis, Dashboard, Quiz, Login/Register keep their previous images. */
+
+.analyze-page.analyze-page {
+  background-image: linear-gradient(135deg, rgba(37,19,23,.93), rgba(37,19,23,.84)), url('./assets/huefit-analysis-silk.jpg') !important;
+  background-repeat: no-repeat; background-position: center, center; background-size: cover, cover;
+}
+.dashboard-page.dashboard-page {
+  background-image: linear-gradient(135deg, rgba(37,19,23,.91), rgba(37,19,23,.80)), url('./assets/huefit-dashboard-everyday.jpg') !important;
+  background-repeat: no-repeat; background-position: center, center; background-size: cover, cover;
+}
+.quiz-page.quiz-page {
+  background-image: linear-gradient(135deg, rgba(37,19,23,.94), rgba(37,19,23,.84)), url('./assets/huefit-quiz-textile.jpg') !important;
+  background-repeat: no-repeat; background-position: center, center; background-size: cover, cover;
+}
+.saved-page.saved-page {
+  background-image: linear-gradient(135deg, rgba(26,15,10,.90), rgba(26,15,10,.78)), url('./assets/huefit-saved-veshti.jpg') !important;
+  background-repeat: no-repeat; background-position: center, center; background-size: cover, cover;
+}
+.closet-page.closet-page {
+  background-image: linear-gradient(135deg, rgba(26,15,10,.90), rgba(26,15,10,.80)), url('./assets/huefit-closet-traditional.jpg') !important;
+  background-repeat: no-repeat; background-position: center, center; background-size: cover, cover;
+}
+
+body.hf-saved, body.hf-closet, body.hf-analyze, body.hf-dashboard, body.hf-quiz, body.hf-profile {
+  background-repeat: no-repeat;
+  background-position: center, center;
+  background-size: cover, cover;
+  background-attachment: scroll;
+}
+body.hf-saved.hf-saved {
+  background-image: linear-gradient(135deg, rgba(26,15,10,.90), rgba(26,15,10,.78)), url('./assets/huefit-saved-veshti.jpg') !important;
+}
+body.hf-closet.hf-closet {
+  background-image: linear-gradient(135deg, rgba(26,15,10,.90), rgba(26,15,10,.80)), url('./assets/huefit-closet-traditional.jpg') !important;
+}
+body.hf-analyze.hf-analyze {
+  background-image: linear-gradient(135deg, rgba(37,19,23,.93), rgba(37,19,23,.84)), url('./assets/huefit-analysis-silk.jpg') !important;
+}
+body.hf-dashboard.hf-dashboard {
+  background-image: linear-gradient(135deg, rgba(37,19,23,.91), rgba(37,19,23,.80)), url('./assets/huefit-dashboard-everyday.jpg') !important;
+}
+body.hf-quiz.hf-quiz {
+  background-image: linear-gradient(135deg, rgba(37,19,23,.94), rgba(37,19,23,.84)), url('./assets/huefit-quiz-textile.jpg') !important;
+}
+
+body.hf-saved.hf-saved main,
+body.hf-saved.hf-saved main.utility,
+body.hf-saved.hf-saved .utility,
+body.hf-saved.hf-saved .analyze-page,
+body.hf-saved.hf-saved .dashboard-page,
+body.hf-saved.hf-saved .quiz-page,
+body.hf-saved.hf-saved .saved-page,
+body.hf-saved.hf-saved .closet-page {
+  background-image: none !important;
+  background-color: transparent !important;
+  animation: none !important;
+}
+
+body.hf-closet.hf-closet main,
+body.hf-closet.hf-closet main.utility,
+body.hf-closet.hf-closet .utility,
+body.hf-closet.hf-closet .analyze-page,
+body.hf-closet.hf-closet .dashboard-page,
+body.hf-closet.hf-closet .quiz-page,
+body.hf-closet.hf-closet .saved-page,
+body.hf-closet.hf-closet .closet-page {
+  background-image: none !important;
+  background-color: transparent !important;
+  animation: none !important;
+}
+
+body.hf-analyze.hf-analyze main,
+body.hf-analyze.hf-analyze main.utility,
+body.hf-analyze.hf-analyze .utility,
+body.hf-analyze.hf-analyze .analyze-page,
+body.hf-analyze.hf-analyze .dashboard-page,
+body.hf-analyze.hf-analyze .quiz-page,
+body.hf-analyze.hf-analyze .saved-page,
+body.hf-analyze.hf-analyze .closet-page {
+  background-image: none !important;
+  background-color: transparent !important;
+  animation: none !important;
+}
+
+body.hf-dashboard.hf-dashboard main,
+body.hf-dashboard.hf-dashboard main.utility,
+body.hf-dashboard.hf-dashboard .utility,
+body.hf-dashboard.hf-dashboard .analyze-page,
+body.hf-dashboard.hf-dashboard .dashboard-page,
+body.hf-dashboard.hf-dashboard .quiz-page,
+body.hf-dashboard.hf-dashboard .saved-page,
+body.hf-dashboard.hf-dashboard .closet-page {
+  background-image: none !important;
+  background-color: transparent !important;
+  animation: none !important;
+}
+
+body.hf-quiz.hf-quiz main,
+body.hf-quiz.hf-quiz main.utility,
+body.hf-quiz.hf-quiz .utility,
+body.hf-quiz.hf-quiz .analyze-page,
+body.hf-quiz.hf-quiz .dashboard-page,
+body.hf-quiz.hf-quiz .quiz-page,
+body.hf-quiz.hf-quiz .saved-page,
+body.hf-quiz.hf-quiz .closet-page {
+  background-image: none !important;
+  background-color: transparent !important;
+  animation: none !important;
+}
+
+body.hf-saved main::before, body.hf-saved main::after,
+body.hf-closet main::before, body.hf-closet main::after,
+body.hf-analyze main::before, body.hf-analyze main::after,
+body.hf-dashboard main::before, body.hf-dashboard main::after,
+body.hf-quiz main::before, body.hf-quiz main::after,
+.analyze-page::before, .analyze-page::after,
+.dashboard-page::before, .dashboard-page::after,
+.quiz-page::before, .quiz-page::after,
+.saved-page::before, .saved-page::after,
+.closet-page::before, .closet-page::after {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+
+.auth-page .auth-art img,
+.auth-page .auth-panel::before {
+  animation: none !important;
+  transform: none !important;
+}
+
+body.hf-profile {
+  background-color: #251317;
+}
+body.hf-profile::before {
+  content: '';
+  display: block !important;
+  position: fixed;
+  z-index: 0;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(135deg, rgba(22,9,13,.80), rgba(22,9,13,.66)), url('./assets/huefit-profile-saree.jpg');
+  background-repeat: no-repeat;
+  background-position: 50% 45%;
+  background-size: 118% 118%;
+  opacity: .95;
+  will-change: transform, background-position;
+  animation: huefitProfileSareeFlow 14s ease-in-out -2s infinite alternate;
+}
+@supports (filter: url("#x")) {
+  body.hf-profile::before {
+    filter: url(#huefitSareeRipple) saturate(.95) brightness(.96);
+  }
+}
+body.hf-profile main,
+body.hf-profile main.utility,
+body.hf-profile .utility,
+body.hf-profile .profile-page {
+  position: relative;
+  z-index: 1;
+  background-image: none !important;
+  background-color: transparent !important;
+  animation: none !important;
+}
+body.hf-profile main::before, body.hf-profile main::after {
+  display: none !important;
+  content: none !important;
+  animation: none !important;
+}
+@keyframes huefitProfileSareeFlow {
+  0%   { transform: translate3d(-2.5%, -1%, 0) rotate(-.5deg) skewX(-.8deg) scale(1.06); background-position: 42% 44%; }
+  25%  { transform: translate3d(-1%, 1.2%, 0) rotate(.3deg) skewX(.6deg)  scale(1.09); background-position: 47% 52%; }
+  50%  { transform: translate3d(1.5%, -1%, 0) rotate(.5deg) skewX(-.5deg) scale(1.07); background-position: 55% 43%; }
+  75%  { transform: translate3d(2.5%, 1%, 0)  rotate(.2deg) skewX(.7deg)  scale(1.09); background-position: 59% 53%; }
+  100% { transform: translate3d(.8%, -1%, 0)  rotate(-.4deg) skewX(-.5deg) scale(1.07); background-position: 50% 45%; }
+}
+@media (max-width: 760px) {
+  body.hf-profile::before { background-size: 130% 130%; animation-duration: 16s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.hf-profile::before { animation: none !important; }
+}

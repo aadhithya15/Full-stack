@@ -1,0 +1,163 @@
+﻿"""Curated style catalog exposed to the frontend.
+
+The catalog is intentionally broad but finite: it keeps the UI useful and
+predictable while the AI can still return a custom garment when the user
+chooses "other" or "let AI decide".
+"""
+
+OCCASIONS = [
+    {"value": "office", "label": "Office"},
+    {"value": "business-meeting", "label": "Business meeting"},
+    {"value": "interview", "label": "Interview"},
+    {"value": "wedding", "label": "Wedding"},
+    {"value": "reception", "label": "Reception"},
+    {"value": "engagement", "label": "Engagement"},
+    {"value": "religious-ceremony", "label": "Religious ceremony"},
+    {"value": "festival", "label": "Festival"},
+    {"value": "pongal", "label": "Pongal"},
+    {"value": "diwali", "label": "Diwali"},
+    {"value": "eid", "label": "Eid"},
+    {"value": "onam", "label": "Onam"},
+    {"value": "navratri", "label": "Navratri"},
+    {"value": "party", "label": "Party"},
+    {"value": "birthday", "label": "Birthday"},
+    {"value": "date-night", "label": "Date night"},
+    {"value": "dinner", "label": "Dinner"},
+    {"value": "brunch", "label": "Brunch"},
+    {"value": "college-farewell", "label": "College farewell"},
+    {"value": "graduation", "label": "Graduation"},
+    {"value": "casual-outing", "label": "Casual outing"},
+    {"value": "travel", "label": "Travel"},
+    {"value": "beach", "label": "Beach day"},
+    {"value": "summer-picnic", "label": "Summer picnic"},
+    {"value": "farewell", "label": "Farewell"},
+    {"value": "casual", "label": "Everyday casual"},
+    {"value": "other", "label": "Other / let AI decide"},
+]
+
+DRESS_TYPES = {
+    "female": [
+        {"value": "saree", "label": "Saree"},
+        {"value": "lehenga-choli", "label": "Lehenga choli"},
+        {"value": "anarkali", "label": "Anarkali"},
+        {"value": "salwar-suit", "label": "Salwar suit"},
+        {"value": "kurta-palazzo", "label": "Kurta and palazzo"},
+        {"value": "sharara", "label": "Sharara"},
+        {"value": "gharara", "label": "Gharara"},
+        {"value": "gown", "label": "Gown"},
+        {"value": "maxi-dress", "label": "Maxi dress"},
+        {"value": "midi-dress", "label": "Midi dress"},
+        {"value": "jumpsuit", "label": "Jumpsuit"},
+        {"value": "skirt-blouse", "label": "Skirt and blouse"},
+        {"value": "blazer-trousers", "label": "Blazer and trousers"},
+        {"value": "western-coord", "label": "Western co-ord"},
+        {"value": "kaftan", "label": "Kaftan"},
+        {"value": "jeans-top", "label": "Jeans and top"},
+        {"value": "let-ai-decide", "label": "Let AI decide"},
+    ],
+    "male": [
+        {"value": "shirt-trousers", "label": "Shirt and trousers"},
+        {"value": "blazer-chinos", "label": "Blazer and chinos"},
+        {"value": "two-piece-suit", "label": "Two-piece suit"},
+        {"value": "three-piece-suit", "label": "Three-piece suit"},
+        {"value": "tuxedo", "label": "Tuxedo"},
+        {"value": "kurta-pajama", "label": "Kurta pajama"},
+        {"value": "kurta-dhoti", "label": "Kurta and dhoti"},
+        {"value": "nehru-jacket", "label": "Nehru jacket"},
+        {"value": "sherwani", "label": "Sherwani"},
+        {"value": "bandhgala", "label": "Bandhgala"},
+        {"value": "pathani-suit", "label": "Pathani suit"},
+        {"value": "polo-jeans", "label": "Polo and jeans"},
+        {"value": "casual-coord", "label": "Casual co-ord"},
+        {"value": "formal-shirt-pants", "label": "Formal shirt and pants"},
+        {"value": "let-ai-decide", "label": "Let AI decide"},
+    ],
+    "neutral": [
+        {"value": "tailored-separates", "label": "Tailored separates"},
+        {"value": "coord-set", "label": "Co-ord set"},
+        {"value": "jumpsuit", "label": "Jumpsuit"},
+        {"value": "layered-outfit", "label": "Layered outfit"},
+        {"value": "relaxed-casual", "label": "Relaxed casual set"},
+        {"value": "minimal-formal", "label": "Minimal formal look"},
+        {"value": "let-ai-decide", "label": "Let AI decide"},
+    ],
+}
+
+MATERIALS = [
+    {"value": "cotton", "label": "Cotton"},
+    {"value": "linen", "label": "Linen"},
+    {"value": "silk", "label": "Silk"},
+    {"value": "raw-silk", "label": "Raw silk"},
+    {"value": "wool", "label": "Wool"},
+    {"value": "cashmere", "label": "Cashmere"},
+    {"value": "velvet", "label": "Velvet"},
+    {"value": "denim", "label": "Denim"},
+    {"value": "leather", "label": "Leather"},
+    {"value": "suede", "label": "Suede"},
+    {"value": "tweed", "label": "Tweed"},
+    {"value": "corduroy", "label": "Corduroy"},
+    {"value": "chiffon", "label": "Chiffon"},
+    {"value": "georgette", "label": "Georgette"},
+    {"value": "organza", "label": "Organza"},
+    {"value": "satin", "label": "Satin"},
+    {"value": "taffeta", "label": "Taffeta"},
+    {"value": "crepe", "label": "Crepe"},
+    {"value": "brocade", "label": "Brocade"},
+    {"value": "lace", "label": "Lace"},
+    {"value": "jersey", "label": "Jersey"},
+    {"value": "knit", "label": "Knit"},
+    {"value": "fleece", "label": "Fleece"},
+    {"value": "rayon", "label": "Rayon"},
+    {"value": "viscose", "label": "Viscose"},
+    {"value": "modal", "label": "Modal"},
+    {"value": "lyocell", "label": "Lyocell"},
+    {"value": "polyester", "label": "Polyester"},
+    {"value": "nylon", "label": "Nylon"},
+    {"value": "spandex", "label": "Spandex"},
+    {"value": "canvas", "label": "Canvas"},
+    {"value": "khadi", "label": "Khadi"},
+    {"value": "handloom-cotton", "label": "Handloom cotton"},
+    {"value": "banarasi-silk", "label": "Banarasi silk"},
+    {"value": "kanjivaram-silk", "label": "Kanjivaram silk"},
+    {"value": "chanderi", "label": "Chanderi"},
+    {"value": "chikankari-cotton", "label": "Chikankari cotton"},
+    {"value": "bamboo", "label": "Bamboo fabric"},
+    {"value": "hemp", "label": "Hemp"},
+    {"value": "let-ai-decide", "label": "Let AI decide"},
+]
+
+# Level 1: cultural direction of the outfit
+OUTFIT_CULTURES = [
+    {"value": "tamil", "label": "Tamil"},
+    {"value": "western", "label": "Western"},
+    {"value": "fusion", "label": "Tamil-western fusion"},
+    {"value": "let-ai-decide", "label": "Let AI decide"},
+]
+
+# Level 2: the style/formality within that culture
+OUTFIT_FORMALITIES = [
+    {"value": "traditional", "label": "Traditional / ceremonial"},
+    {"value": "formal", "label": "Formal / office"},
+    {"value": "casual", "label": "Casual / everyday"},
+    {"value": "party", "label": "Party / evening"},
+    {"value": "festive", "label": "Festive"},
+    {"value": "let-ai-decide", "label": "Let AI decide"},
+]
+
+OPTION_VALUES = {
+    "outfit_cultures": {item["value"] for item in OUTFIT_CULTURES},
+    "outfit_formalities": {item["value"] for item in OUTFIT_FORMALITIES},
+    "occasions": {item["value"] for item in OCCASIONS},
+    "materials": {item["value"] for item in MATERIALS},
+    "dress_types": {gender: {item["value"] for item in items} for gender, items in DRESS_TYPES.items()},
+}
+
+
+def public_options() -> dict:
+    return {
+        "events": OCCASIONS,
+        "dress_types": DRESS_TYPES,
+        "materials": MATERIALS,
+        "outfit_cultures": OUTFIT_CULTURES,
+        "outfit_formalities": OUTFIT_FORMALITIES,
+    }

@@ -1,21 +1,19 @@
-# Environment secrets
-.env
-**/.env
-
-# Python virtual environments and cache
-.venv/
-**/.venv/
-__pycache__/
-**/__pycache__/
-*.py[cod]
-
-# Node dependencies and builds
+﻿# Dependencies
 node_modules/
 **/node_modules/
+.venv/
+venv/
+__pycache__/
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Build output and logs
 dist/
-**/dist/
-
-# Editor/system files
-.vscode/
-.DS_Store
-Thumbs.db
+build/
+.next/
+out/
+coverage/
+*.log
