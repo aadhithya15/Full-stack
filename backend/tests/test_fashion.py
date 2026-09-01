@@ -1,4 +1,4 @@
-﻿"""Phase 4 tests â€” /api/fashion/analyze in mock mode (DB mocked)."""
+﻿"""Phase 4 tests " /api/fashion/analyze in mock mode (DB mocked)."""
 from unittest.mock import patch
 
 import pytest
@@ -78,7 +78,10 @@ def test_analyze_happy_path(authed):
         "image_url", "match_score",
     ):
         assert field in r, f"missing field {field}"
-    assert r["image_url"].startswith("https://image.pollinations.ai/")
+    # MVP template era: image_url is a template render URL or None
+    # (no template in mock/test DB -> None with image_source 'none')
+    assert "image_source" in r
+    assert r["image_url"] is None or isinstance(r["image_url"], str)
     assert r["dress_colors"][0]["hex"].startswith("#")
 
 

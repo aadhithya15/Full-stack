@@ -1,6 +1,6 @@
 """All database reads/writes in one place.
 
-Every function takes user_id explicitly and filters on it â€” this is the
+Every function takes user_id explicitly and filters on it " this is the
 ownership enforcement layer (the service key bypasses RLS, so THIS code
 is what keeps users out of each other's data).
 
@@ -95,7 +95,7 @@ def insert_recommendations(
             return res.data
         except Exception as exc:
             missing = str(exc).lower()
-            optional = {field for field in ("garments", "outfit_type", "materials") if field in missing}
+            optional = {field for field in ("garments", "outfit_type", "materials", "image_source", "template_code") if field in missing}
             if not optional:
                 raise
             rows = [{k: v for k, v in row.items() if k not in optional} for row in rows]
@@ -116,7 +116,7 @@ def get_recommendation(user_id: str, recommendation_id: str) -> dict[str, Any] |
 
 
 def list_past_outfit_names(user_id: str, limit: int = 30) -> list[str]:
-    """Names of recent outfits â€” used for anti-repetition exclusions."""
+    """Names of recent outfits " used for anti-repetition exclusions."""
     res = (
         get_supabase()
         .table("recommendations")
@@ -218,3 +218,160 @@ def delete_closet_item(user_id: str, item_id: str) -> dict[str, Any] | None:
         .execute()
     )
     return res.data[0] if res.data else None
+
+
+# ---------------------------------------------------- v2 product catalogue
+
+
+def get_or_create_client(name: str) -> dict[str, Any]:
+    """Find a catalogue client by name, creating it if new."""
+    sb = get_supabase()
+    res = (
+        sb.table("catalog_clients").select("*").eq("name", name).limit(1).execute()
+    )
+    if res.data:
+        return res.data[0]
+    res = sb.table("catalog_clients").insert({"name": name}).execute()
+    return res.data[0]
+
+
+def upsert_product(client_id: str, fields: dict[str, Any]) -> dict[str, Any]:
+    """Insert or update one product row (identified by client + title)."""
+    sb = get_supabase()
+    existing = (
+        sb.table("products")
+        .select("id")
+        .eq("client_id", client_id)
+        .eq("title", fields.get("title"))
+        .limit(1)
+        .execute()
+    )
+    row = {**fields, "client_id": client_id}
+    if existing.data:
+        res = (
+            sb.table("products")
+            .update(row)
+            .eq("id", existing.data[0]["id"])
+            .execute()
+        )
+    else:
+        res = sb.table("products").insert(row).execute()
+    return res.data[0]
+
+
+def count_products(client_id: str | None = None) -> int:
+    sb = get_supabase()
+    q = sb.table("products").select("id", count="exact").limit(0)
+    if client_id:
+        q = q.eq("client_id", client_id)
+    return q.execute().count or 0
+
+
+def search_products_by_vector(
+    embedding: list[float],
+    gender: str | None = None,
+    culture: str | None = None,
+    occasion: str | None = None,
+    limit: int = 15,
+) -> list[dict[str, Any]]:
+    """Nearest-neighbour search over product embeddings via the RPC helper.
+
+    Uses the match_products SQL function (created in migration 006b) so the
+    HNSW index is applied server-side. Returns rows with a `similarity`
+    column (1.0 = identical direction, 0.0 = unrelated).
+    """
+    sb = get_supabase()
+    res = sb.rpc(
+        "match_products",
+        {
+            "query_embedding": embedding,
+            "match_count": limit,
+            "filter_gender": gender,
+            "filter_culture": culture,
+            "filter_occasion": occasion,
+        },
+    ).execute()
+    return res.data or []
+
+
+def list_products(client_id: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
+    sb = get_supabase()
+    q = sb.table("products").select(
+        "id, title, gender, dress_type, culture, occasions, dominant_hex, "
+        "hue_family, tags, price, currency, image_url, buy_url, in_stock, indexed_at"
+    ).limit(limit)
+    if client_id:
+        q = q.eq("client_id", client_id)
+    return q.execute().data or []
+
+
+# ------------------------------------------------------- outfit templates
+
+
+def upsert_template(fields: dict[str, Any]) -> dict[str, Any]:
+    """Insert or update a template row (identified by template_code)."""
+    sb = get_supabase()
+    code = fields.get("template_code")
+    existing = (
+        sb.table("outfit_templates")
+        .select("id")
+        .eq("template_code", code)
+        .limit(1)
+        .execute()
+    )
+    if existing.data:
+        res = (
+            sb.table("outfit_templates")
+            .update(fields)
+            .eq("id", existing.data[0]["id"])
+            .execute()
+        )
+    else:
+        res = sb.table("outfit_templates").insert(fields).execute()
+    return res.data[0]
+
+
+def select_templates(
+    dress_type: str | None = None,
+    gender: str | None = None,
+    culture: str | None = None,
+    style_tag: str | None = None,
+    only_active: bool = True,
+    limit: int = 10,
+) -> list[dict[str, Any]]:
+    """Find selectable templates for the runtime flow.
+
+    Runtime selection only ever sees active + QA-approved templates.
+    """
+    sb = get_supabase()
+    q = sb.table("outfit_templates").select("*").limit(limit)
+    if only_active:
+        q = q.eq("active_status", True).eq("qa_status", "approved")
+    if dress_type:
+        q = q.eq("dress_type", dress_type)
+    if gender:
+        q = q.eq("gender", gender)
+    if culture:
+        q = q.eq("culture", culture)
+    if style_tag:
+        q = q.contains("style_tags", [style_tag])
+    return q.execute().data or []
+
+
+def set_template_qa(template_code: str, qa_status: str, active: bool) -> bool:
+    sb = get_supabase()
+    res = (
+        sb.table("outfit_templates")
+        .update({"qa_status": qa_status, "active_status": active})
+        .eq("template_code", template_code)
+        .execute()
+    )
+    return bool(res.data)
+
+
+def count_templates(only_active: bool = False) -> int:
+    sb = get_supabase()
+    q = sb.table("outfit_templates").select("id", count="exact").limit(0)
+    if only_active:
+        q = q.eq("active_status", True).eq("qa_status", "approved")
+    return q.execute().count or 0

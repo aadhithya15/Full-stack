@@ -15,7 +15,6 @@ from app.db import queries
 from app.middleware.auth_middleware import require_auth
 from app.middleware.rate_limit import rate_limit
 from app.services import ai_service
-from app.services.image_service import outfit_image_url
 from app.services.style_options import OPTION_VALUES, public_options
 from app.utils.errors import ApiError
 
@@ -190,15 +189,44 @@ def analyze():
     if not recos:
         raise ApiError.ai_unavailable("Could not generate recommendations, please try again")
 
-    # ---------- 4) add outfit image URLs ----------
-    for r in recos:
-        r["image_url"] = outfit_image_url(
-            r["outfit_name"], r["description"], r["dress_colors"], gender, occasion,
-            outfit_culture=outfit_culture,
-        outfit_formality=outfit_formality,
-        age=age,
-            llm_image_prompt=r.pop("image_prompt", ""),
-        )
+    # ---------- 4) recommendation images: TEMPLATE RECOLOURING (MVP) ----------
+    # Strategy doc flow: select approved template -> stored mask ->
+    # apply the LLM-recommended colour inside the mask. No generation.
+    from app.services.template_service import pick_template, render_recommendation
+
+    g_for_template = gender if gender in ("male", "female") else "unisex"
+    culture_for_template = outfit_culture if outfit_culture != "let-ai-decide" else None
+
+    def _render_one(r: dict) -> None:
+        """Render one outfit's image; failures leave image_url None."""
+        r.pop("image_prompt", "")  # legacy field from the generation era
+        r["image_url"] = None
+        r["image_source"] = "none"
+        primary_hex = (r.get("dress_colors") or [{}])[0].get("hex")
+        r_dress_type = (r.get("outfit_type") or dress_type or "").strip().lower()
+        if not primary_hex:
+            return
+        try:
+            tpl = pick_template(
+                dress_type=r_dress_type,
+                gender=g_for_template,
+                culture=culture_for_template,
+            )
+            if tpl is not None:
+                url = render_recommendation(tpl, primary_hex)
+                if url:
+                    r["image_url"] = url
+                    r["image_source"] = "template"
+                    r["template_code"] = tpl["template_code"]
+        except Exception:
+            pass  # image is a visual aid - never fail the recommendation for it
+
+    # Parallel: 4 outfits render concurrently. On cache misses this turns
+    # ~4x(recolour+upload) serial time into roughly one round trip.
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=4) as pool:
+        list(pool.map(_render_one, recos))
 
     # ---------- 5) persist ----------
     analysis = queries.insert_analysis(
@@ -245,6 +273,8 @@ def analyze():
                     "styling_tips": row["styling_tips"],
                     "avoid_colors": row["avoid_colors"],
                     "image_url": row["image_url"],
+                    "image_source": row.get("image_source", "none"),
+                    "template_code": row.get("template_code"),
                     "match_score": row["match_score"],
                 }
                 for row in saved

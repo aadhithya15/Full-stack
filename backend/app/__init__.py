@@ -1,4 +1,4 @@
-"""HueFit backend - Flask application factory."""
+﻿"""HueFit backend - Flask application factory."""
 import logging
 import time
 
@@ -29,7 +29,7 @@ def create_app(config_class: type[Config] = Config) -> Flask:
     )
     # Third-party HTTP libraries are extremely chatty at DEBUG level -
     # keep our app logs readable.
-    for noisy in ("httpx", "httpcore", "hpack", "h2", "urllib3"):
+    for noisy in ("httpx", "httpcore", "hpack", "h2", "urllib3", "PIL"):
         logging.getLogger(noisy).setLevel(logging.WARNING)
 
     @app.before_request

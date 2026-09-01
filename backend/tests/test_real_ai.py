@@ -129,57 +129,6 @@ def test_prompt_includes_two_level_style_rules():
     assert "image_prompt" in p
 
 
-def test_image_url_uses_llm_prompt_when_given():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Test Saree", "desc", [{"name": "Emerald", "hex": "#0F7B4D"}],
-        "female", "wedding", outfit_culture="tamil", outfit_formality="traditional",
-        llm_image_prompt="full body photograph of a South Indian woman wearing emerald Kanjivaram silk saree with gold zari border",
-    )
-    assert "Kanjivaram" in urllib.parse.unquote(url)
-
-
-def test_image_fallback_tamil_traditional():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Silk Saree", "a saree", [{"name": "Red", "hex": "#AA0000"}],
-        "female", "wedding", outfit_culture="tamil", outfit_formality="traditional",
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "Tamil" in decoded and "temple jewellery" in decoded
-
-
-def test_image_fallback_tamil_casual_differs_from_traditional():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Cotton Kurti", "a kurti", [{"name": "Blue", "hex": "#0000AA"}],
-        "female", "casual", outfit_culture="tamil", outfit_formality="casual",
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "kurti" in decoded.lower() or "Chettinad" in decoded
-    assert "wedding hall" not in decoded  # casual must not use the wedding scene
-
-
-def test_image_fallback_western_formal():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Business Suit", "a suit", [{"name": "Navy", "hex": "#1F3554"}],
-        "male", "office", outfit_culture="western", outfit_formality="formal",
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "business suit" in decoded.lower()
-    assert "Kanjivaram" not in decoded  # no ethnic bleed into western
-
-
-# ----------------------------------------------------------------- age feature
 
 
 def test_prompt_includes_age_rules():
@@ -210,30 +159,7 @@ def test_prompt_without_age_uses_default():
     assert "assume mid-20s" in p
 
 
-def test_image_fallback_reflects_age():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
 
-    url = outfit_image_url(
-        "Silk Saree", "a saree", [{"name": "Red", "hex": "#AA0000"}],
-        "female", "wedding", outfit_culture="tamil",
-        outfit_formality="traditional", age=42,
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "early forties" in decoded
-
-
-def test_image_fallback_teen_age():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Cotton Kurti", "a kurti", [{"name": "Blue", "hex": "#0000AA"}],
-        "female", "casual", outfit_culture="tamil",
-        outfit_formality="casual", age=15,
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "teenage" in decoded
 
 
 def test_analyze_rejects_bad_age(client_for_age):
