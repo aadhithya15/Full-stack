@@ -282,7 +282,7 @@
      "piece": "kurta",
      "z": 0,
      "mask": "universal-masking/M11-kurta-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "churidar",
@@ -420,19 +420,19 @@
      "piece": "lehenga",
      "z": 1,
      "mask": "universal-masking/W2-lehenga-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "choli",
      "z": 1,
      "mask": "universal-masking/W2-choli-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "dupatta",
      "z": 0,
      "mask": "universal-masking/W2-dupatta-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },

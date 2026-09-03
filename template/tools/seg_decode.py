@@ -88,8 +88,14 @@ def main():
         base = os.path.join(ROOT, "template", o["image"])
         if args.only and o["id"] not in args.only:
             continue
-        if not os.path.exists(seg) or not os.path.exists(base):
+        if not os.path.exists(base):
             continue
+        if not os.path.exists(seg):
+            continue
+        # An outfit whose seg file exists but never printed a verdict means the decoder silently skipped
+        # it (a manifest/model piece-count mismatch used to do exactly that, hiding W17 from the report).
+        if len([q for q in o["pieces"] if q["z"]]) not in (1, 2, 3, 4):
+            print(f"  {o['id']:4s} SKIP  manifest lists {len([q for q in o['pieces'] if q['z']])} visible pieces, palette only carries 4")
         X = load(seg)
         B = np.asarray(Image.open(base).convert("RGB"), dtype=float)
         cloth, solid = cloth_mask(B)
@@ -140,6 +146,14 @@ def main():
         for k, m in pieces.items():
             a_ = int(m.sum())
             if a_ < 0.015 * cloth.sum():
+                # A garment COMPLETELY hidden behind an outer layer has no visible pixels, and an empty mask
+                # for it is the correct answer, not a failure (M11's kurta under a closed Pathani jacket).
+                # Only treat it as an error when the manifest claims the piece is visible (z:1) AND the
+                # region is merely small rather than absent.
+                occluded = a_ < 0.002 * cloth.sum()
+                if occluded:
+                    pieces[k] = np.zeros_like(cloth)
+                    continue
                 probs.append(f"{k} area {a_}px too small"); continue
             lab, n = ndimage.label(m, structure=np.ones((3, 3)))
             big = max(np.bincount(lab.ravel(), minlength=n + 1)[1:]) if n else 0
