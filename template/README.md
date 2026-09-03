@@ -36,7 +36,13 @@ Multi-piece outfits carry one mask per garment piece — never merged.
 - template/v2-tones/<tone>/<id>.jpg - 6 skin-tone variants per photo: fair, light-warm, light-tan, medium-brown, deep, ebony.
 - v1 folders (base/, universality-masking/, 8 old tone folders) freeze after 114/240 and are superseded when all 32 v2 photos complete.
 
-## v2 heal pass (this push)
+## v2 re-roll batch (this push)
+- see history below
+
+## v2 heal pass
 - 26/32 bases REBUILT clean: snapshot restore + flatten/strip/zero-halo + SPECKLE HEAL (backdrop-value holes inside garment interiors inpainted from surrounding fabric). Re-graded PASS; masks re-run: 55 masks, 0 overlap, 0 skin violations; contact-sheet + production-render QA eyeballed.
 - v2-tones/light-tan mirrors current bases. W1/W2 light-tan frozen; W2's 5 tone edits generated and QA'd (fair/light-warm/medium/deep/ebony: W2 4x pass).
-- EXCLUDED pending regeneration: M12/M13/M14 (garment too dark), W13/W17 (current heal pushed bases keep last graded versions), M15 (not yet generated).
+- EXCLUDED pending regeneration: M12/M13/M14 (garment too dark), W13/W17 superseded by clean re-rolls, M15 generated this push.
+
+## v2 re-roll batch (this push)
+- M12/M13/M14 regenerated with reinforced brightness prompts -> garments 204-217 (were 157-178); M15 generated (bandhgala shirt-jacket + trousers, AI-decide line); W13/W17 regenerated clean. All 32 bases now PASS gates (bgY 128+-, bgSD<=4.1 post-build / <=0.3 final, ctr>=69) + healed + 57 masks, 0 overlap, 0 skin violations. light-tan mirrors all 31. W2 tones x5 staged. W1 'deep' QA pending; remaining tone edits next.
