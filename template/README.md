@@ -38,31 +38,39 @@ W16-jeans-top, W17-let-ai-decide
 Recolour = replace pixels inside a mask (white) with the shop's target colour; outside-mask
 pixels stay untouched. Masks are zero-skin/zero-background by construction.
 
-## Status (verified by git-history + checksum audit, not by hand)
+## Status (verified by git-history + checksum + per-tone luminance audit, not by hand)
 
-All 32 `base/` masters are regenerated clean (the systemic fabric static/glitch artifact that was
-baked into the original batch is gone — it had propagated into every tone copy made from a base).
+All 32 `base/` masters are regenerated clean (the systemic fabric static/glitch artifact baked into
+the original batch is gone; it had propagated into every tone copy made from a base).
 
-Tone folders: **68 of 192 images verified fresh** (derived from a fixed base AND not a pixel copy of
-base). A naive git-history check passes 71, but 3 of those are the `light-tan` placeholders listed
-below, so 71 - 3 = 68 is the real count.
+### Verification applied to every pushed image
+1. dimensions 768x1376 == base; 2. no pixel-copy of base (catches placeholders); 3. edits confined
+to skin (changed pixels 2-4%, inside subject bbox, garment/background untouched); 4. backdrop
+neutral #808080 (corner deviation <=6, no cast/gradient); 5. no static/glitch artifact; 6. skin tone
+measured on an auto-located face patch must sit within +-15 of its tone anchor and neighbours must
+stay >=8 apart.
 
-| State | Garments |
+Tone anchors (target face-patch luminance): fair 174, light-warm 158, light-tan 140,
+medium-brown 111, deep 80, ebony 67.
+
+### Counts
+- 86 of 192 tone images are derived from a clean base; **80 of those pass all six checks**.
+- **112 generations remain** = 106 stale/never-generated + 6 QC re-dos.
+
+### QC re-do queue (present but tone is off)
+| file | issue |
 |---|---|
-| Complete, all 6 tones | M1, M2, M3, M4, M5, M6, M12, M13, M14, W3, W4 |
-| Partial | W5 (fair + light-warm only) |
-| Needs regeneration | M7, M8, M9, M10, M11, M15, W1, W2 (stale — made from old corrupted bases), W6–W17 (mostly never generated) |
-| Placeholders to overwrite | `light-tan/W11-jumpsuit.jpg`, `light-tan/W14-western-coord.jpg`, `light-tan/W16-jeans-top.jpg` are byte-identical copies of `base/` |
+| `ebony/M7-kurta-dhoti.jpg` | 41.5 vs anchor 67 (-25, overshot to near-black) |
+| `deep/M9-sherwani.jpg` | 66.8 vs anchor 80 (-13; its ebony is fine - neighbours collided) |
+| `deep/M3-two-piece-suit.jpg` | 70.2 vs anchor 80, only 1.3 from ebony |
+| `deep/M13-casual-coord.jpg` | 59.5 vs anchor 80 (-20; darker than its own ebony) |
+| `ebony/W4-salwar-suit.jpg` | 72.4, only 5.8 from deep |
+| `light-warm/W3-anarkali.jpg` | 176.5 vs anchor 158 (+18, collides with fair) |
 
-FLAG (needs rebalance, generated but under-separated): `M7-kurta-dhoti` in `light-warm`
-(lum 144.8) sits only 5.1 pts from `light-tan` (139.7), and `ebony` (74.6) only 6.6 pts from
-`deep` (81.3) — the reference M6/M8 spacing is >=12 pts per step. Both to be regenerated lighter
-(light-warm) and much darker (ebony) so all 6 tones read as distinct.
+### Remaining stale / never-generated (106)
+M10, M11, M15, W1, W2 (6 tones each = 36), W5 (4), W6-W17 (12 sets x 6 = 72, incl. overwriting
+`light-tan/W11-jumpsuit.jpg`, `light-tan/W14-western-coord.jpg`, `light-tan/W16-jeans-top.jpg`
+which are byte-identical copies of base/).
 
-Remaining work: **124 images** = 48 stale (M7, M8, M9, M10, M11, M15, W1, W2 → 8 sets × 6 tones)
-+ 4 missing for W5 (light-tan is a stale copy; medium-brown/deep/ebony absent)
-+ 72 for W6–W17 (12 sets × 6 tones, incl. overwriting the 3 `light-tan` placeholders).
-Then rebuild `universal-masking/` against the new set.
-
-- `universal-masking/` — carried over from the previous mask build; will be regenerated/replaced
-  once the base/tone set is fully complete (masking phase not started).
+- `universal-masking/` - carried over from the previous mask build; to be regenerated once the
+  base/tone set is complete (masking phase not started).
