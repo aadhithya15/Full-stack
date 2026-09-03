@@ -183,6 +183,19 @@ def main():
         names = [p["piece"] for p in o["pieces"] if p["z"]]
         if not names:
             names = [o["pieces"][0]["piece"]]
+        if len(names) == 1:
+            # single-piece outfit (kaftan, gown, midi, jumpsuit, anarkali): there is nothing to split, so
+            # the mask is the whole cloth region. Cutting it anyway produced W15's 3%/97% "two pieces".
+            one = ndimage.binary_closing(cloth, np.ones((5, 5)))
+            if not a.dry and one.sum() > 0.30 * max(cloth.sum(), 1):
+                Image.fromarray((one * 255).astype(np.uint8)).save(
+                    os.path.join(outdir, f"{o['id']}-{names[0]}-mask.png"), optimize=True)
+                for pp in o["pieces"]:
+                    if pp["z"] == 0:
+                        Image.fromarray(np.zeros((TH, TW), np.uint8)).save(
+                            os.path.join(outdir, f"{o['id']}-{pp['piece']}-mask.png"), optimize=True)
+                ok += 1
+            continue
         seams = ov.get(o["id"], {}).get("seams") or seam_candidates(cloth, solid, max(2, len(names)))
         if a.report:
             print(f"  {o['id']:4s} {len(names)} piece(s) {names} seams={seams}")
@@ -236,9 +249,11 @@ def main():
                 if not len(ysx):
                     continue
                 st = (float(ysx.min()) - top) / span
+                if k in WHOLE_BODY:
+                    continue
                 if k in UPPER and st > 0.42:
                     roles.append(f"{k}(upper) starts at {st:.2f} of the cloth span")
-                if k in LOWER and k not in WHOLE_BODY and st < 0.18:
+                if k in LOWER and st < 0.18:
                     roles.append(f"{k}(lower) starts at {st:.2f} of the cloth span")
             if roles:
                 skew = "role-mismatch " + "; ".join(roles)

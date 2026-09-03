@@ -697,9 +697,10 @@
     },
     {
      "piece": "belt",
-     "z": 1,
+     "z": 0,
      "mask": "universal-masking/W15-belt-mask.png",
-     "status": "pending"
+     "status": "pending",
+     "note": "self-fabric tie, same colour as the kaftan - not independently recolourable"
     }
    ]
   },
