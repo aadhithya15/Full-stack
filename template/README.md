@@ -54,6 +54,11 @@ below, so 71 - 3 = 68 is the real count.
 | Needs regeneration | M7, M8, M9, M10, M11, M15, W1, W2 (stale — made from old corrupted bases), W6–W17 (mostly never generated) |
 | Placeholders to overwrite | `light-tan/W11-jumpsuit.jpg`, `light-tan/W14-western-coord.jpg`, `light-tan/W16-jeans-top.jpg` are byte-identical copies of `base/` |
 
+FLAG (needs rebalance, generated but under-separated): `M7-kurta-dhoti` in `light-warm`
+(lum 144.8) sits only 5.1 pts from `light-tan` (139.7), and `ebony` (74.6) only 6.6 pts from
+`deep` (81.3) — the reference M6/M8 spacing is >=12 pts per step. Both to be regenerated lighter
+(light-warm) and much darker (ebony) so all 6 tones read as distinct.
+
 Remaining work: **124 images** = 48 stale (M7, M8, M9, M10, M11, M15, W1, W2 → 8 sets × 6 tones)
 + 4 missing for W5 (light-tan is a stale copy; medium-brown/deep/ebony absent)
 + 72 for W6–W17 (12 sets × 6 tones, incl. overwriting the 3 `light-tan` placeholders).
