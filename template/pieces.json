@@ -1,0 +1,755 @@
+{
+ "_comment": "Piece-level mask manifest. One mask PNG per piece per outfit => white = that piece's pixels, black = everything else. A garment that is present but not visible behind an outer layer still gets a mask file, but z:0 means it is occluded at the edges the recolour can actually reach: the shop should recolour it together with its parent piece instead of independently (the pixels cannot be isolated without guessing). z:1 pieces have clean, independent boundaries.",
+ "canvas": {
+  "w": 768,
+  "h": 1376,
+  "masks": "same size, 8-bit PNG, 255=that piece, 0=not",
+  "mask_derivation": "derived once from template/base/<ID>.jpg; valid for all six tone folders because every tone file is the identical frame with only skin L/S changed (verified: silhouette IoU vs base >= 0.999, backdrop movement 0.000%)"
+ },
+ "outfits": [
+  {
+   "id": "M1",
+   "group": "men",
+   "name": "Shirt and Trousers",
+   "slug": "shirt-trousers",
+   "image": "base/M1-shirt-trousers.jpg",
+   "pieces": [
+    {
+     "piece": "shirt",
+     "z": 1,
+     "mask": "universal-masking/M1-shirt-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/M1-trousers-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M2",
+   "group": "men",
+   "name": "Blazer and Chinos",
+   "slug": "blazer-chinos",
+   "image": "base/M2-blazer-chinos.jpg",
+   "pieces": [
+    {
+     "piece": "blazer",
+     "z": 1,
+     "mask": "universal-masking/M2-blazer-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "shirt",
+     "z": 1,
+     "mask": "universal-masking/M2-shirt-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "chinos",
+     "z": 1,
+     "mask": "universal-masking/M2-chinos-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M3",
+   "group": "men",
+   "name": "Two-Piece Suit",
+   "slug": "two-piece-suit",
+   "image": "base/M3-two-piece-suit.jpg",
+   "pieces": [
+    {
+     "piece": "jacket",
+     "z": 1,
+     "mask": "universal-masking/M3-jacket-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/M3-trousers-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "shirt",
+     "z": 0,
+     "mask": "universal-masking/M3-shirt-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M4",
+   "group": "men",
+   "name": "Three-Piece Suit",
+   "slug": "three-piece-suit",
+   "image": "base/M4-three-piece-suit.jpg",
+   "pieces": [
+    {
+     "piece": "jacket",
+     "z": 1,
+     "mask": "universal-masking/M4-jacket-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "waistcoat",
+     "z": 1,
+     "mask": "universal-masking/M4-waistcoat-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/M4-trousers-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "shirt",
+     "z": 0,
+     "mask": "universal-masking/M4-shirt-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M5",
+   "group": "men",
+   "name": "Tuxedo",
+   "slug": "tuxedo",
+   "image": "base/M5-tuxedo.jpg",
+   "pieces": [
+    {
+     "piece": "jacket",
+     "z": 1,
+     "mask": "universal-masking/M5-jacket-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/M5-trousers-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "shirt",
+     "z": 0,
+     "mask": "universal-masking/M5-shirt-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M6",
+   "group": "men",
+   "name": "Kurta Pajama",
+   "slug": "kurta-pajama",
+   "image": "base/M6-kurta-pajama.jpg",
+   "pieces": [
+    {
+     "piece": "kurta",
+     "z": 1,
+     "mask": "universal-masking/M6-kurta-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "pajama",
+     "z": 1,
+     "mask": "universal-masking/M6-pajama-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "M7",
+   "group": "men",
+   "name": "Kurta and Dhoti",
+   "slug": "kurta-dhoti",
+   "image": "base/M7-kurta-dhoti.jpg",
+   "pieces": [
+    {
+     "piece": "kurta",
+     "z": 1,
+     "mask": "universal-masking/M7-kurta-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "dhoti",
+     "z": 1,
+     "mask": "universal-masking/M7-dhoti-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "M8",
+   "group": "men",
+   "name": "Nehru Jacket",
+   "slug": "nehru-jacket-kurta",
+   "image": "base/M8-nehru-jacket-kurta.jpg",
+   "pieces": [
+    {
+     "piece": "nehru-jacket",
+     "z": 1,
+     "mask": "universal-masking/M8-nehru-jacket-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "kurta",
+     "z": 1,
+     "mask": "universal-masking/M8-kurta-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "pajama",
+     "z": 1,
+     "mask": "universal-masking/M8-pajama-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M9",
+   "group": "men",
+   "name": "Sherwani",
+   "slug": "sherwani",
+   "image": "base/M9-sherwani.jpg",
+   "pieces": [
+    {
+     "piece": "sherwani",
+     "z": 1,
+     "mask": "universal-masking/M9-sherwani-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "kurta",
+     "z": 0,
+     "mask": "universal-masking/M9-kurta-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "churidar",
+     "z": 1,
+     "mask": "universal-masking/M9-churidar-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "M10",
+   "group": "men",
+   "name": "Bandhgala",
+   "slug": "bandhgala",
+   "image": "base/M10-bandhgala.jpg",
+   "pieces": [
+    {
+     "piece": "jacket",
+     "z": 1,
+     "mask": "universal-masking/M10-jacket-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "shirt",
+     "z": 0,
+     "mask": "universal-masking/M10-shirt-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/M10-trousers-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M11",
+   "group": "men",
+   "name": "Pathani Suit",
+   "slug": "pathani",
+   "image": "base/M11-pathani.jpg",
+   "pieces": [
+    {
+     "piece": "jacket",
+     "z": 1,
+     "mask": "universal-masking/M11-jacket-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "kurta",
+     "z": 0,
+     "mask": "universal-masking/M11-kurta-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "churidar",
+     "z": 1,
+     "mask": "universal-masking/M11-churidar-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "patka",
+     "z": 1,
+     "mask": "universal-masking/M11-patka-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "M12",
+   "group": "men",
+   "name": "Polo and Jeans",
+   "slug": "polo-jeans",
+   "image": "base/M12-polo-jeans.jpg",
+   "pieces": [
+    {
+     "piece": "polo",
+     "z": 1,
+     "mask": "universal-masking/M12-polo-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "jeans",
+     "z": 1,
+     "mask": "universal-masking/M12-jeans-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M13",
+   "group": "men",
+   "name": "Casual Co-Ord",
+   "slug": "casual-coord",
+   "image": "base/M13-casual-coord.jpg",
+   "pieces": [
+    {
+     "piece": "top",
+     "z": 1,
+     "mask": "universal-masking/M13-top-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/M13-trousers-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M14",
+   "group": "men",
+   "name": "Formal Shirt and Pants",
+   "slug": "formal-shirt-pants",
+   "image": "base/M14-formal-shirt-pants.jpg",
+   "pieces": [
+    {
+     "piece": "shirt",
+     "z": 1,
+     "mask": "universal-masking/M14-shirt-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "pants",
+     "z": 1,
+     "mask": "universal-masking/M14-pants-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "M15",
+   "group": "men",
+   "name": "Belted Asymmetric-Hem Kurta Jacket + Tapered Trousers",
+   "slug": "kurta-jacket-tapered",
+   "image": "base/M15-kurta-jacket-tapered.jpg",
+   "pieces": [
+    {
+     "piece": "kurta-jacket",
+     "z": 1,
+     "mask": "universal-masking/M15-kurta-jacket-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "belt-sash",
+     "z": 1,
+     "mask": "universal-masking/M15-belt-sash-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/M15-trousers-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "W1",
+   "group": "women",
+   "name": "Saree",
+   "slug": "saree",
+   "image": "base/W1-saree.jpg",
+   "pieces": [
+    {
+     "piece": "saree-drape",
+     "z": 1,
+     "mask": "universal-masking/W1-saree-drape-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "blouse",
+     "z": 1,
+     "mask": "universal-masking/W1-blouse-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W2",
+   "group": "women",
+   "name": "Lehenga Choli",
+   "slug": "lehenga-choli",
+   "image": "base/W2-lehenga-choli.jpg",
+   "pieces": [
+    {
+     "piece": "lehenga",
+     "z": 1,
+     "mask": "universal-masking/W2-lehenga-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "choli",
+     "z": 1,
+     "mask": "universal-masking/W2-choli-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "dupatta",
+     "z": 0,
+     "mask": "universal-masking/W2-dupatta-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W3",
+   "group": "women",
+   "name": "Anarkali",
+   "slug": "anarkali",
+   "image": "base/W3-anarkali.jpg",
+   "pieces": [
+    {
+     "piece": "anarkali",
+     "z": 1,
+     "mask": "universal-masking/W3-anarkali-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "salwar",
+     "z": 1,
+     "mask": "universal-masking/W3-salwar-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "W4",
+   "group": "women",
+   "name": "Salwar Suit",
+   "slug": "salwar-suit",
+   "image": "base/W4-salwar-suit.jpg",
+   "pieces": [
+    {
+     "piece": "kurti",
+     "z": 1,
+     "mask": "universal-masking/W4-kurti-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "salwar",
+     "z": 1,
+     "mask": "universal-masking/W4-salwar-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "dupatta",
+     "z": 1,
+     "mask": "universal-masking/W4-dupatta-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W5",
+   "group": "women",
+   "name": "Kurta and Palazzo",
+   "slug": "kurta-palazzo",
+   "image": "base/W5-kurta-palazzo.jpg",
+   "pieces": [
+    {
+     "piece": "kurta",
+     "z": 1,
+     "mask": "universal-masking/W5-kurta-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "palazzo",
+     "z": 1,
+     "mask": "universal-masking/W5-palazzo-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W6",
+   "group": "women",
+   "name": "Sharara",
+   "slug": "sharara",
+   "image": "base/W6-sharara.jpg",
+   "pieces": [
+    {
+     "piece": "kurti",
+     "z": 1,
+     "mask": "universal-masking/W6-kurti-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "sharara",
+     "z": 1,
+     "mask": "universal-masking/W6-sharara-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "dupatta",
+     "z": 1,
+     "mask": "universal-masking/W6-dupatta-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "W7",
+   "group": "women",
+   "name": "Gharara",
+   "slug": "gharara",
+   "image": "base/W7-gharara.jpg",
+   "pieces": [
+    {
+     "piece": "kurti",
+     "z": 1,
+     "mask": "universal-masking/W7-kurti-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "gharara",
+     "z": 1,
+     "mask": "universal-masking/W7-gharara-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W8",
+   "group": "women",
+   "name": "Gown",
+   "slug": "evening-gown",
+   "image": "base/W8-evening-gown.jpg",
+   "pieces": [
+    {
+     "piece": "gown",
+     "z": 1,
+     "mask": "universal-masking/W8-gown-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W9",
+   "group": "women",
+   "name": "Maxi Dress",
+   "slug": "maxi-dress",
+   "image": "base/W9-maxi-dress.jpg",
+   "pieces": [
+    {
+     "piece": "maxi",
+     "z": 1,
+     "mask": "universal-masking/W9-maxi-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W10",
+   "group": "women",
+   "name": "Midi Dress",
+   "slug": "midi-dress",
+   "image": "base/W10-midi-dress.jpg",
+   "pieces": [
+    {
+     "piece": "midi",
+     "z": 1,
+     "mask": "universal-masking/W10-midi-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W11",
+   "group": "women",
+   "name": "Jumpsuit",
+   "slug": "jumpsuit",
+   "image": "base/W11-jumpsuit.jpg",
+   "pieces": [
+    {
+     "piece": "jumpsuit",
+     "z": 1,
+     "mask": "universal-masking/W11-jumpsuit-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W12",
+   "group": "women",
+   "name": "Skirt and Blouse",
+   "slug": "skirt-blouse",
+   "image": "base/W12-skirt-blouse.jpg",
+   "pieces": [
+    {
+     "piece": "blouse",
+     "z": 1,
+     "mask": "universal-masking/W12-blouse-mask.png",
+     "status": "built"
+    },
+    {
+     "piece": "skirt",
+     "z": 1,
+     "mask": "universal-masking/W12-skirt-mask.png",
+     "status": "built"
+    }
+   ]
+  },
+  {
+   "id": "W13",
+   "group": "women",
+   "name": "Blazer and Trousers",
+   "slug": "blazer-trousers",
+   "image": "base/W13-blazer-trousers.jpg",
+   "pieces": [
+    {
+     "piece": "blazer",
+     "z": 1,
+     "mask": "universal-masking/W13-blazer-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "top",
+     "z": 1,
+     "mask": "universal-masking/W13-top-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/W13-trousers-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W14",
+   "group": "women",
+   "name": "Western Co-Ord",
+   "slug": "western-coord",
+   "image": "base/W14-western-coord.jpg",
+   "pieces": [
+    {
+     "piece": "top",
+     "z": 1,
+     "mask": "universal-masking/W14-top-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "trousers",
+     "z": 1,
+     "mask": "universal-masking/W14-trousers-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W15",
+   "group": "women",
+   "name": "Kaftan",
+   "slug": "kaftan",
+   "image": "base/W15-kaftan.jpg",
+   "pieces": [
+    {
+     "piece": "kaftan",
+     "z": 1,
+     "mask": "universal-masking/W15-kaftan-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "belt",
+     "z": 1,
+     "mask": "universal-masking/W15-belt-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W16",
+   "group": "women",
+   "name": "Jeans and Top",
+   "slug": "jeans-top",
+   "image": "base/W16-jeans-top.jpg",
+   "pieces": [
+    {
+     "piece": "top",
+     "z": 1,
+     "mask": "universal-masking/W16-top-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "jeans",
+     "z": 1,
+     "mask": "universal-masking/W16-jeans-mask.png",
+     "status": "pending"
+    }
+   ]
+  },
+  {
+   "id": "W17",
+   "group": "women",
+   "name": "Indo-Western Draped Co-Ord",
+   "slug": "indo-western-drape",
+   "image": "base/W17-indo-western-drape.jpg",
+   "pieces": [
+    {
+     "piece": "crop-jacket",
+     "z": 1,
+     "mask": "universal-masking/W17-crop-jacket-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "draped-skirt",
+     "z": 1,
+     "mask": "universal-masking/W17-draped-skirt-mask.png",
+     "status": "pending"
+    },
+    {
+     "piece": "palazzo",
+     "z": 1,
+     "mask": "universal-masking/W17-palazzo-mask.png",
+     "status": "pending"
+    }
+   ]
+  }
+ ]
+}
