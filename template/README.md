@@ -38,72 +38,58 @@ W16-jeans-top, W17-let-ai-decide
 Recolour = replace pixels inside a mask (white) with the shop's target colour; outside-mask
 pixels stay untouched. Masks are zero-skin/zero-background by construction.
 
-## Status (verified by git-history + checksum + per-tone luminance audit, not by hand)
+## Status (verified by tools/check_backdrop.py, never by eye)
 
-All 32 `base/` masters are regenerated clean (the systemic fabric static/glitch artifact baked into
-the original batch is gone; it had propagated into every tone copy made from a base).
+### The backdrop rule, and the two ways it was previously gotten wrong
+Background must be one flat #808080 (L=128) **edge to edge**, no lighter panel behind the model, no
+darker outer margins, no enclosed bright sliver. Two bugs kept that from being true:
+
+1. **A paint window narrower than the field.** The first flattener only repainted pixels within +-14 of
+   128 and only those *connected to the frame border*. A panel sitting at 137 was therefore left
+   standing while the field around it went to exactly 128 -- which SHARPENED the edge it was meant to
+   remove. `bgmask.py` now paints every field pixel (+-30) that is border-connected, plus enclosed
+   pockets.
+2. **A gate narrower than the defect.** The gate used to measure only pixels within +-8 of 128, so
+   blocks averaging 137 were invisible to it and files were certified clean while still showing the
+   panel. The gate now measures whatever `bgmask.background()` returns, so tool and gate cannot
+   disagree, and it includes interior pockets (16x207 px arm-to-torso sliver at 144 in
+   `light-warm/M11-pathani`, 1,490 px at 146 in `light-tan/M7-kurta-dhoti`, both real background).
+
+Pockets vs cloth creases are separated by **what surrounds them**, not by luminance: a crease inside
+fabric is wrapped ~97% by bright cloth (L>180), a background gap only ~53-64%. Painting a crease
+would burn a flat grey smudge into the garment -- the glitch this catalogue is being rebuilt to avoid.
+
+### One pass only
+`tools/flatten_backdrop.py` must be run **once** per generation batch. Re-running it on its own output
+creeps about 0.3% of silhouette area per pass (edge ringing qualifies as field, gets painted, shaves
+the garment); five passes moved area 3.9% and changed subject-core pixels by up to 44 levels. After a
+batch: flatten (once) -> `python3 template/tools/check_backdrop.py` -> audit subject integrity against
+the previous commit.
 
 ### Verification applied to every pushed image
-1. dimensions 768x1376 == base; 2. no pixel-copy of base (catches placeholders); 3. edits confined
-to skin (changed pixels 2-4%, inside subject bbox, garment/background untouched); 4. backdrop
-neutral #808080 (corner deviation <=6, no cast/gradient); 5. no static/glitch artifact; 6. skin tone
-measured on an auto-located face patch must sit within +-15 of its tone anchor and neighbours must
-stay >=8 apart.
+1. dimensions 768x1376 == base; 2. not a byte-identical copy of the base (catches placeholders);
+3. edits confined to skin (changed pixels inside subject bbox, garment/background untouched);
+4. backdrop uniform: 96px block means over the shared background mask have spread <=2.0,
+   |mean-128| <=1.5, and 16px cell-mean std <=0.30 (`tools/check_backdrop.py`, exit 0);
+5. no static/glitch artifact; 6. skin tone on an auto-located face patch within +-15 of its anchor and
+   neighbours >=8 apart.
 
-Tone anchors (target face-patch luminance): fair 174, light-warm 158, light-tan 140,
-medium-brown 111, deep 80, ebony 67.
+Tone anchors (target face-patch luminance): fair 174, light-warm 158, light-tan 140, medium-brown 111,
+deep 80, ebony 67.
 
-### Counts
-- **107 of 192 tone images are usable** (right dims, not a pixel copy, backdrop uniform, skin tone
-  on-anchor with >=8 ladder spacing, and derived from a fixed base).
-- **85 remain** = 63 never generated + 22 present-but-stale-fabric (W1 light-tan/deep/ebony, all of
-  W2, W5 light-tan, and the 12 W6-W17 `light-tan` placeholder copies).
+### Counts (recounted from disk, 2026-09-03)
+- 32 `base/` masters: all clean, all pass the backdrop gate.
+- **101 of 192 tone images usable**; 123 tone files present, of which 22 are present-but-stale-fabric.
+- **91 remain** = 69 never generated + 22 stale fabric (W1 `light-tan`/`deep`/`ebony`, all six of W2,
+  W5 `light-tan`, and the 12 `light-tan` placeholder copies in W6-W17).
+- No two tone files in the catalogue are byte-identical (0 duplicate groups).
 
-### Backdrop uniformity is now ENFORCED, not requested
-`tools/flatten_backdrop.py` repaints the outside field of every file to exactly #808080. This was
-added because generated frames carried a few grey levels of vertical drift and, in some, a lighter
-panel behind the subject - visible as a "fade" or box edge on a flat field, and missed by an earlier
-check that averaged background pixels (two greys average into one plausible number).
-
-Gate used to verify it: 96px block means of the background (a pixel-level std is useless here because
-anti-alias halos around fingers and sandal straps dominate it). Pass = block-mean spread <= 2.0 and
-|mean-128| <= 1.5. After the fix all 129 existing files pass; offsets are ~0.01 grey.
-Run it after generating new variants, before committing.
-
-### Key method: chained sibling edits (learned from 6 failed re-dos)
-Editing a tone variant straight from `base/` repeatedly overshot or undershot on garments whose base
-skin sits far from the target tone (M13/deep overshot twice in opposite directions; M15's whole set
-came out compressed and too dark). Generating each variant from its **nearest already-correct sibling**
-with a *small* instruction ("slightly darker", "only a touch lighter") converged first time:
-M13/deep from M13/ebony -> 72.9 PASS; M10/ebony from M10/deep -> 58.8 PASS.
-For M15 the next pass will build the ladder as a chain: fair from base, light-warm from fair,
-light-tan from light-warm, ebony from deep - which enforces spacing by construction.
-
-### QC method notes (what does NOT### Queue (priority order)
-1. `W1-saree` - `light-tan` (regeneration rejected: whole backdrop rendered at ~110 grey instead of
-   #808080 - reverted to the previous file), `deep` + `ebony` (still stale, pre-base-fix, carry the
-   scalloped lower-drape blotches), optional rebalance of `fair` (189.9 vs anchor 174 - pale extreme,
-   fabric and backdrop are correct).
-2. `W2-lehenga-choli` all 6 (stale by provenance; deep/ebony also measured +7%/+17% edge energy).
-3. `W5-kurta-palazzo` (4) then `W6`-`W17` (72, never generated; overwrites the 3 `light-tan`
-   pixel-copy placeholders for W11/W14/W16).
-
-### Backdrop gate (added after two bad files slipped through)
-Corner samples alone are not enough. Now checking mean luminance of the true backdrop (low-saturation
-pixels outside the central band) against its base: must stay within ~4 and remain flat (std < 2,
-left-right < 3, top-bottom < 6). This caught `light-tan/W1-saree` at 109.8 vs base 127.2 - a uniform
-but wrong grey, invisible to a corner-only test.
-
-o) - regenerate only if strict
-   base-consistency across every file is required rather than appearance-based.
-
-### Tone anchors (target face-patch luminance; +-15 tolerance, neighbours >=8 apart)
-fair 174, light-warm 158, light-tan 140, medium-brown 111, deep 80, ebony 67.
-
-### Remaining stale / never-generated (106)
-M10, M11, M15, W1, W2 (6 tones each = 36), W5 (4), W6-W17 (12 sets x 6 = 72, incl. overwriting
-`light-tan/W11-jumpsuit.jpg`, `light-tan/W14-western-coord.jpg`, `light-tan/W16-jeans-top.jpg`
-which are byte-identical copies of base/).
-
-- `universal-masking/` - carried over from the previous mask build; to be regenerated once the
-  base/tone set is complete (masking phase not started).
+### `M15-let-ai-decide` re-cut (outfit, not backdrop)
+The old M15 master was a bandhgala-style jacket, the same garment family as M10 (silhouette overlap
+0.79 vs 0.96 for a genuine re-tone of one file), so the AI-decided card was a near-duplicate of the
+bandhgala card. It is now a belted asymmetric-hem kurta-jacket over tapered trousers -- the only
+diagonal hem in the catalogue (measured 86 px hem step, y1291 vs y1205), with the same model, pose,
+framing and lighting as the old frame. A linen blazer set was rejected as the replacement because M2,
+M3, M4 and M5 already occupy that silhouette. Its six tone files must be regenerated against the new
+base (the old ones were retired), and `unified-masking/` must redo M15's masks: the garment outline
+changed, so any existing M15 mask no longer matches.
