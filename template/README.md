@@ -54,8 +54,21 @@ Tone anchors (target face-patch luminance): fair 174, light-warm 158, light-tan 
 medium-brown 111, deep 80, ebony 67.
 
 ### Counts
-- **98 of 192 tone images pass all six checks.**
-- **94 generations remain**, listed in the queue below.
+- **107 of 192 tone images are usable** (right dims, not a pixel copy, backdrop uniform, skin tone
+  on-anchor with >=8 ladder spacing, and derived from a fixed base).
+- **85 remain** = 63 never generated + 22 present-but-stale-fabric (W1 light-tan/deep/ebony, all of
+  W2, W5 light-tan, and the 12 W6-W17 `light-tan` placeholder copies).
+
+### Backdrop uniformity is now ENFORCED, not requested
+`tools/flatten_backdrop.py` repaints the outside field of every file to exactly #808080. This was
+added because generated frames carried a few grey levels of vertical drift and, in some, a lighter
+panel behind the subject - visible as a "fade" or box edge on a flat field, and missed by an earlier
+check that averaged background pixels (two greys average into one plausible number).
+
+Gate used to verify it: 96px block means of the background (a pixel-level std is useless here because
+anti-alias halos around fingers and sandal straps dominate it). Pass = block-mean spread <= 2.0 and
+|mean-128| <= 1.5. After the fix all 129 existing files pass; offsets are ~0.01 grey.
+Run it after generating new variants, before committing.
 
 ### Key method: chained sibling edits (learned from 6 failed re-dos)
 Editing a tone variant straight from `base/` repeatedly overshot or undershot on garments whose base
@@ -66,28 +79,22 @@ M13/deep from M13/ebony -> 72.9 PASS; M10/ebony from M10/deep -> 58.8 PASS.
 For M15 the next pass will build the ladder as a chain: fair from base, light-warm from fair,
 light-tan from light-warm, ebony from deep - which enforces spacing by construction.
 
-### QC method notes (what does NOT work — learned the hard way)
-Three automated defect proxies were tried and rejected after validation, because e### Queue (priority order)
-1. `light-tan/M11-pathani` (120.7, collides with its medium-brown 120.3) and `ebony/M11-pathani`
-   (stale, pre-base-fix) - M11's other 4 tones pass.
-2. `M15-let-ai-decide` - `fair` (158.5), `light-warm` (139.4), `light-tan` (109.9) off-anchor and
-   `ebony` (78.9) colliding with `deep` (75.6). Redo via the chained-sibling method above;
-   `medium-brown` and `deep` already pass. All 6 are now derived from the current base, so the old
-   stale-lineage concern for M15 is closed.
-3. `W1-saree` all 6 tones - visually confirmed defect: tones carry scalloped/torn blotches on the
-   lower drape that the current base does not have.
-4. `W2-lehenga-choli` all 6 tones (stale by provenance; `deep`/`ebony` also measure +7%/+17% edge
-   energy) then `W5` (4) and `W6`-`W17` (72, never generated; includes overwriting the 3 `light-tan`
+### QC method notes (what does NOT### Queue (priority order)
+1. `W1-saree` - `light-tan` (regeneration rejected: whole backdrop rendered at ~110 grey instead of
+   #808080 - reverted to the previous file), `deep` + `ebony` (still stale, pre-base-fix, carry the
+   scalloped lower-drape blotches), optional rebalance of `fair` (189.9 vs anchor 174 - pale extreme,
+   fabric and backdrop are correct).
+2. `W2-lehenga-choli` all 6 (stale by provenance; deep/ebony also measured +7%/+17% edge energy).
+3. `W5-kurta-palazzo` (4) then `W6`-`W17` (72, never generated; overwrites the 3 `light-tan`
    pixel-copy placeholders for W11/W14/W16).
 
-tone sibling instead of the base).
-2. `W1-saree` all 6 tones - visually confirmed: tones carry scalloped/torn blotches on the lower
-   drape that the current base does not have; the set no longer matches its own base.
-3. `W2-lehenga-choli` 6 tones + `M11-pathani/ebony` - stale by provenance (pre-base-fix).
-4. W5 (4) then W6-W17 (72) - never generated; also overwrites the 3 `light-tan` pixel-copy
-   placeholders (W11/W14/W16) which measure as OLD-lineage.
-5. Deferred pending owner decision: `M15-let-ai-decide` 6 tones are stale by provenance but visually
-   clean on triage (12 if `M11`'s other files are counted too) - regenerate only if strict
+### Backdrop gate (added after two bad files slipped through)
+Corner samples alone are not enough. Now checking mean luminance of the true backdrop (low-saturation
+pixels outside the central band) against its base: must stay within ~4 and remain flat (std < 2,
+left-right < 3, top-bottom < 6). This caught `light-tan/W1-saree` at 109.8 vs base 127.2 - a uniform
+but wrong grey, invisible to a corner-only test.
+
+o) - regenerate only if strict
    base-consistency across every file is required rather than appearance-based.
 
 ### Tone anchors (target face-patch luminance; +-15 tolerance, neighbours >=8 apart)
