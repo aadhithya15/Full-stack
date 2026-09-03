@@ -38,10 +38,24 @@ W16-jeans-top, W17-let-ai-decide
 Recolour = replace pixels inside a mask (white) with the shop's target colour; outside-mask
 pixels stay untouched. Masks are zero-skin/zero-background by construction.
 
-## Status
-- `base/` — all 32 masters complete.
-- Tone folders — regenerated per-garment across all 6 tones as a rolling batch job (some garments
-  still pending full 6-tone coverage; `light-tan` currently mirrors `base/` for garments not yet
-  tone-edited).
+## Status (verified by git-history + checksum audit, not by hand)
+
+All 32 `base/` masters are regenerated clean (the systemic fabric static/glitch artifact that was
+baked into the original batch is gone — it had propagated into every tone copy made from a base).
+
+Tone folders: **71 of 192 images verified fresh** (derived from a fixed base, and not a pixel copy).
+
+| State | Garments |
+|---|---|
+| Complete, all 6 tones | M1, M2, M3, M4, M5, M6, M12, M13, M14, W3, W4 |
+| Partial | W5 (fair + light-warm only) |
+| Needs regeneration | M7, M8, M9, M10, M11, M15, W1, W2 (stale — made from old corrupted bases), W6–W17 (mostly never generated) |
+| Placeholders to overwrite | `light-tan/W11-jumpsuit.jpg`, `light-tan/W14-western-coord.jpg`, `light-tan/W16-jeans-top.jpg` are byte-identical copies of `base/` |
+
+Remaining work: **124 images** = 48 stale (M7, M8, M9, M10, M11, M15, W1, W2 → 8 sets × 6 tones)
++ 4 missing for W5 (light-tan is a stale copy; medium-brown/deep/ebony absent)
++ 72 for W6–W17 (12 sets × 6 tones, incl. overwriting the 3 `light-tan` placeholders).
+Then rebuild `universal-masking/` against the new set.
+
 - `universal-masking/` — carried over from the previous mask build; will be regenerated/replaced
-  once the new base/tone set is fully complete.
+  once the base/tone set is fully complete (masking phase not started).
