@@ -1,4 +1,4 @@
-﻿-- Clear ages outside the new 14-45 band (old test data)
+-- Clear ages outside the new 14-45 band (old test data)
 update public.analyses
   set age = null
   where age is not null and (age < 14 or age > 45);
