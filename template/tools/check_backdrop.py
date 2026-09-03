@@ -21,8 +21,8 @@ from bgmask import background
 TONE=['fair','light-warm','light-tan','medium-brown','deep','ebony']
 ONLY=[a for a in sys.argv[1:] if not a.startswith('-')]
 BLK,CELL=96,16
-files=[p for p in sorted(glob.glob('template/base/*.jpg')) for t in ['.']+TONE]
-files=sorted(set([f'template/{t}/{os.path.basename(p)}' for p in sorted(glob.glob('template/base/*.jpg')) for t in ['.']+TONE]))
+files=sorted(set([os.path.join(d,os.path.basename(p)) for p in sorted(glob.glob('template/base/*.jpg'))
+                  for d in ['template/base']+ [f'template/{t}' for t in TONE]]))
 if ONLY: files=[f for f in files if any(o in os.path.basename(f) for o in ONLY)]
 rows=[]; miss=0
 for p in files:
