@@ -29,3 +29,9 @@ zone clearance, silhouette containment, disjointness, morphology, format).
 Photo: `<PhotoID>-<desc>.jpg`  e.g. W1-lehenga-choli.jpg
 Mask:  `<PhotoID>-<piece>-mask.png`  e.g. W1-choli-mask.png, W1-lehenga-mask.png
 Multi-piece outfits carry one mask per garment piece — never merged.
+
+## V2 (grey-backdrop rebuild)
+- template/v2-base/<id>.jpg - photorealistic 768x1376 masters on uniform #808080 grey (32 ids, M1..M15 / W1..W17; "let-ai-decide" included).
+- template/v2-masking/<piece>-mask.png - part masks (FASHN parser + geometry; parts disjoint, zero skin, zero backdrop).
+- template/v2-tones/<tone>/<id>.jpg - 6 skin-tone variants per photo: fair, light-warm, light-tan, medium-brown, deep, ebony.
+- v1 folders (base/, universality-masking/, 8 old tone folders) freeze after 114/240 and are superseded when all 32 v2 photos complete.
