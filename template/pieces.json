@@ -399,13 +399,13 @@
      "piece": "saree-drape",
      "z": 1,
      "mask": "universal-masking/W1-saree-drape-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "blouse",
      "z": 1,
      "mask": "universal-masking/W1-blouse-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -543,13 +543,13 @@
      "piece": "kurti",
      "z": 1,
      "mask": "universal-masking/W7-kurti-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "gharara",
      "z": 1,
      "mask": "universal-masking/W7-gharara-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -564,7 +564,7 @@
      "piece": "gown",
      "z": 1,
      "mask": "universal-masking/W8-gown-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -579,7 +579,7 @@
      "piece": "maxi",
      "z": 1,
      "mask": "universal-masking/W9-maxi-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -594,7 +594,7 @@
      "piece": "midi",
      "z": 1,
      "mask": "universal-masking/W10-midi-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -609,7 +609,7 @@
      "piece": "jumpsuit",
      "z": 1,
      "mask": "universal-masking/W11-jumpsuit-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },

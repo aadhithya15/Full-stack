@@ -43,7 +43,10 @@ TW, TH = 768, 1376
 UPPER = {"shirt", "blazer", "jacket", "nehru-jacket", "kurta-jacket", "polo", "top", "choli", "blouse",
          "kurti", "anarkali", "kurta", "sherwani", "waistcoat", "gown", "maxi", "midi", "kaftan", "jumpsuit"}
 LOWER = {"trousers", "pants", "chinos", "jeans", "pajama", "churidar", "dhoti", "salwar", "palazzo",
-         "sharara", "gharara", "lehenga", "skirt", "saree-drape", "draped-skirt"}
+         "sharara", "gharara", "lehenga", "skirt"}
+# garments that legitimately occupy the whole figure: no upper/lower start rule applies to them
+WHOLE_BODY = {"saree-drape", "draped-skirt", "kaftan", "anarkali", "jumpsuit", "gown", "maxi", "midi",
+              "kurta", "sherwani", "dhoti"}
 # role check: a piece named as upper-body must sit mostly above the cloth's mid-line, and vice versa.
 # Without it the validator happily ships W1 with the "blouse" band under the drape and W4 with the "kurti"
 # as a 35px collar sliver -- a partition that covers the cloth is NOT the same as a correct segmentation.
@@ -191,6 +194,8 @@ def main():
         span = max(1, bot - top)
         cuts = [top] + sorted(seams) + [bot + 1]
         bands = [band_mask(cloth, cuts[i], cuts[i + 1]) for i in range(len(cuts) - 1)]
+        if len(names) == 1 and len(seams) >= 1 and len(bands) > 1:
+            bands = [cloth.copy()]; names = [names[0]]; seams = []
         if len(bands) == len(names):
             # The manifest lists pieces semantically (M2 = blazer, shirt, chinos); the bands are cut
             # top-to-bottom. Sort names by each band's centre row so a trouser band cannot inherit the
@@ -233,7 +238,7 @@ def main():
                 st = (float(ysx.min()) - top) / span
                 if k in UPPER and st > 0.42:
                     roles.append(f"{k}(upper) starts at {st:.2f} of the cloth span")
-                if k in LOWER and st < 0.18:
+                if k in LOWER and k not in WHOLE_BODY and st < 0.18:
                     roles.append(f"{k}(lower) starts at {st:.2f} of the cloth span")
             if roles:
                 skew = "role-mismatch " + "; ".join(roles)
@@ -241,6 +246,13 @@ def main():
                 fail += 1
                 unresolved.append((o["id"], f"cover={cover:.2f} small={small} {skew}", len(bands)))
                 continue
+            if bands:
+                # same rule as seg_decode: no cloth pixel may be left unowned
+                big = int(np.argmax([m.sum() for m in bands]))
+                bands[big] = bands[big] | (cloth & ~union)
+                union = np.zeros_like(cloth)
+                for m in bands:
+                    union |= m
             if not a.dry:
                 for name, m in zip(names, bands):
                     Image.fromarray((m * 255).astype(np.uint8)).save(

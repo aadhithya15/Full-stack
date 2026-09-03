@@ -21,14 +21,13 @@ template/
 
 | | on disk | gates |
 |---|---|---|
-| `base/` | **29 / 32** | 29 PASS / 0 FAIL |
-| tone folders | **29 each = 174 / 192** | 29 PASS / 0 FAIL, pose-lock **29/29** in all six |
-| `universal-masking/` | **14 masks / 6 outfits** (M6, M7, M9, M11, M15, W3) | validated, see below |
+| `base/` | **32 / 32** | 32 PASS / 0 FAIL |
+| tone folders | **32 each = 192 / 192** | 32 PASS / 0 FAIL, pose-lock **32/32** in all six |
+| `universal-masking/` | **27 of 73 pieces / 12 fully-masked outfits** | see "Masks" |
 
-**Missing 3 bases → 18 tones:** W7-gharara (garment delta 41.1, faded), W15-kaftan (delta 40.9 + spread
-2.23), W16-jeans-top (backdrop spread 2.20). These were carried over from the pre-rebuild batch and are
-the only survivors that still fail; they must be regenerated, not patched — brightening faded cloth toward
-210 clips the fabric, and a second flatten pass shaves the silhouette.
+Catalogue complete: the 3 carried-over frames that failed on merit (W7 delta 41.1, W15 40.9, W16 spread
+2.20) were regenerated — W15 now measures delta 73.8, W16 sharpness 11.0 -> 6.33. **Masks are the open
+front, not the photos.**
 
 10 of 13 carried-over women's outfits were **salvaged rather than regenerated**: they failed only the new
 skin-saturation band, which is a colour transform (`tools/tone.py`), not a re-roll. That saved 130 image

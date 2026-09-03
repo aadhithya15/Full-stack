@@ -34,7 +34,7 @@ from scipy import ndimage
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.abspath(os.path.join(HERE, "..", ".."))
 sys.path.insert(0, HERE)
-from make_masks import cloth_mask
+from make_masks import cloth_mask, UPPER, LOWER, WHOLE_BODY
 
 COL = {"red": (255, 0, 0), "green": (0, 255, 0), "blue": (0, 0, 255),
        "yellow": (255, 255, 0), "magenta": (255, 0, 255)}
@@ -44,12 +44,18 @@ def load(p):
     return np.asarray(Image.open(p).convert("RGB"), dtype=int)
 
 
-def decode(X, names, thr=140):
+def decode(X, names, thr=140, majority=True):
     """Return {piece: bool mask} for an ordered list of colour names matched to the palette."""
     out = {}
     for name, col in zip(names, list(COL)[:len(names)]):
         c = np.array(COL[col], dtype=float)
-        out[name] = (np.abs(X - c).max(2) < (255 - thr))
+        m = (np.abs(X - c).max(2) < (255 - thr))
+        if majority:
+            # a segmentation PNG arrives with 1-2px anti-aliased fringes; those flip between threshold 140
+            # and 110, which showed up as IoU 0.938 against my 0.97 stability floor. A 3x3 majority vote
+            # removes fringe indecision without eroding the piece boundary.
+            m = ndimage.median_filter(m.astype(np.uint8), 3).astype(bool)
+        out[name] = m
     return out
 
 
@@ -67,15 +73,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("segdir")
     ap.add_argument("--only", nargs="*", default=[])
-    a = ap.parse_args()
+    args = ap.parse_args()
     man = json.load(open(os.path.join(ROOT, "template", "pieces.json")))
     outdir = os.path.join(ROOT, "template", "universal-masking")
     os.makedirs(outdir, exist_ok=True)
     ok = rej = 0
     for o in man["outfits"]:
-        seg = os.path.join(ROOT, a.segdir, f"{o['id']}-seg.png")
+        seg = os.path.join(ROOT, args.segdir, f"{o['id']}-seg.png")
         base = os.path.join(ROOT, "template", o["image"])
-        if a.only and o["id"] not in a.only:
+        if args.only and o["id"] not in args.only:
             continue
         if not os.path.exists(seg) or not os.path.exists(base):
             continue
@@ -101,6 +107,23 @@ def main():
         else:
             cov = union.sum() / max(cloth.sum(), 1)
             probs = []
+            ys_all = np.nonzero(cloth.any(1))[0]
+            ct, cb = int(ys_all.min()), int(ys_all.max()); cspan = max(1, cb - ct)
+            if len(pieces) != len(names):
+                probs.append(f"got {len(pieces)} coloured regions for {len(names)} manifest pieces")
+            for k, m in pieces.items():
+                ysx = np.nonzero(m.any(1))[0]
+                if not len(ysx):
+                    continue
+                st = (float(ysx.min()) - ct) / cspan
+                if k in UPPER and st > 0.42:
+                    probs.append(f"{k}(upper) starts at {st:.2f} of the cloth span")
+                # a saree drape / kaftan / jumpsuit legitimately spans shoulder to ankle: applying a
+                # "lower garment cannot start high" floor to WHOLE_BODY pieces rejected a CORRECT W1
+                # mask (drape starting at 0.00 is right for a saree). Only enforce the floor on pieces
+                # that are meant to start below an outer layer.
+                if k in LOWER and k not in WHOLE_BODY and st < 0.18:
+                    probs.append(f"{k}(lower) starts at {st:.2f} of the cloth span")
             if cov < 0.90:
                 probs.append(f"coverage {cov:.2f}<0.90")
             for k, m in pieces.items():
@@ -118,6 +141,31 @@ def main():
                 print(f"  {o['id']:4s} REJECT  " + "; ".join(probs))
                 rej += 1
                 continue
+            # EVERY cloth pixel must belong to exactly one piece or the recolour leaves an unrecoloured
+            # grey patch on the mannequin (7k px at 97.8% coverage is visible on the shoulder). Unclaimed
+            # cloth is handed to the piece whose pixels are nearest, which is the drape/outer garment.
+            left = cloth & ~union
+            if left.any():
+                # Grow the dominant piece by a couple of px so it absorbs fragments that touch it, then
+                # give it everything still unclaimed. (A per-fragment nearest-pixel assignment was tried
+                # first and OOM-killed the process at ~300k reference pixels -- overkill for 7k of cloth.)
+                big = max(pieces, key=lambda k: pieces[k].sum())
+                g = ndimage.binary_dilation(pieces[big], np.ones((3, 3)), iterations=2) & cloth
+                pieces[big] = g | (cloth & ~union & ~np.logical_or.reduce([m for k, m in pieces.items() if k != big] or [cloth & False]))
+                union = np.zeros_like(cloth)
+                for m in pieces.values():
+                    union |= m
+                cov = union.sum() / max(cloth.sum(), 1)
+                print(f"  {o['id']:4s} note  {int((cloth & ~union).sum())}px still unclaimed -> absorbed; "
+                      f"coverage now {cov:.4f}")
+                left = cloth & ~union
+                if left.any():
+                    pieces[big] = pieces[big] | left
+                    union = np.zeros_like(cloth)
+                    for m in pieces.values():
+                        union |= m
+                    cov = union.sum() / max(cloth.sum(), 1)
+
             for k, m in pieces.items():
                 Image.fromarray((m * 255).astype(np.uint8)).save(
                     os.path.join(outdir, f"{o['id']}-{k}-mask.png"), optimize=True)
