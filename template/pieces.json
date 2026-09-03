@@ -18,13 +18,13 @@
      "piece": "shirt",
      "z": 1,
      "mask": "universal-masking/M1-shirt-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "trousers",
      "z": 1,
      "mask": "universal-masking/M1-trousers-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -39,19 +39,19 @@
      "piece": "blazer",
      "z": 1,
      "mask": "universal-masking/M2-blazer-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "shirt",
      "z": 1,
      "mask": "universal-masking/M2-shirt-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "chinos",
      "z": 1,
      "mask": "universal-masking/M2-chinos-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -66,19 +66,19 @@
      "piece": "jacket",
      "z": 1,
      "mask": "universal-masking/M3-jacket-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "trousers",
      "z": 1,
      "mask": "universal-masking/M3-trousers-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "shirt",
      "z": 0,
      "mask": "universal-masking/M3-shirt-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -126,19 +126,19 @@
      "piece": "jacket",
      "z": 1,
      "mask": "universal-masking/M5-jacket-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "trousers",
      "z": 1,
      "mask": "universal-masking/M5-trousers-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "shirt",
      "z": 0,
      "mask": "universal-masking/M5-shirt-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -195,19 +195,19 @@
      "piece": "nehru-jacket",
      "z": 1,
      "mask": "universal-masking/M8-nehru-jacket-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "kurta",
      "z": 1,
      "mask": "universal-masking/M8-kurta-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "pajama",
      "z": 1,
      "mask": "universal-masking/M8-pajama-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -249,19 +249,19 @@
      "piece": "jacket",
      "z": 1,
      "mask": "universal-masking/M10-jacket-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "shirt",
      "z": 0,
      "mask": "universal-masking/M10-shirt-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "trousers",
      "z": 1,
      "mask": "universal-masking/M10-trousers-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -330,13 +330,13 @@
      "piece": "top",
      "z": 1,
      "mask": "universal-masking/M13-top-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "trousers",
      "z": 1,
      "mask": "universal-masking/M13-trousers-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -351,13 +351,13 @@
      "piece": "shirt",
      "z": 1,
      "mask": "universal-masking/M14-shirt-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "pants",
      "z": 1,
      "mask": "universal-masking/M14-pants-mask.png",
-     "status": "pending"
+     "status": "built"
     }
    ]
   },
@@ -693,13 +693,13 @@
      "piece": "kaftan",
      "z": 1,
      "mask": "universal-masking/W15-kaftan-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "belt",
      "z": 0,
      "mask": "universal-masking/W15-belt-mask.png",
-     "status": "pending",
+     "status": "built",
      "note": "self-fabric tie, same colour as the kaftan - not independently recolourable"
     }
    ]
@@ -736,19 +736,19 @@
      "piece": "crop-jacket",
      "z": 1,
      "mask": "universal-masking/W17-crop-jacket-mask.png",
-     "status": "pending"
+     "status": "no-base"
     },
     {
      "piece": "draped-skirt",
      "z": 1,
      "mask": "universal-masking/W17-draped-skirt-mask.png",
-     "status": "pending"
+     "status": "no-base"
     },
     {
      "piece": "palazzo",
      "z": 1,
      "mask": "universal-masking/W17-palazzo-mask.png",
-     "status": "pending"
+     "status": "no-base"
     }
    ]
   }
