@@ -109,3 +109,39 @@ python3 template/tools/build_batch.py <folder-of-9:16-frames>
 
 Nothing in `backend/`, `backend-inspect/` or `huefit-frontend/` references `template/` (grep: 0 hits), so
 the asset side can be finished independently of the recolour route.
+
+## Mask pipeline (three stages, run in this order)
+
+Colour alone cannot separate a grey jacket from grey trousers, so masking is a
+pipeline of three increasingly specific stages. Each writes the same
+`universal-masking/<ID>-<piece>-mask.png` files and each *rejects* loudly
+rather than shipping a mask it cannot justify:
+
+1. `tools/make_masks.py` - colour-derived cloth mask + hem/width seam
+   detection. Handles the easy two-piece outfits with a clean waist break.
+2. `tools/seg_decode.py` (with `tools/SEGMENT_PROMPT.md`) - the model paints
+   one flat colour per garment on the photo; the decoder turns those colours
+   into masks. Works when the garments are visually distinct in the frame.
+3. `tools/make_anchor_masks.py` (with `tools/ANCHOR_PROMPT.md`) - the reliable
+   route for the hard cases: the model mattes exactly **one** garment, as pure
+   white on pure black. That single-region ask is something the image model can
+   actually do, where the three-colour segmentation it kept failing at was not.
+   The anchored piece is `matte ∩ cloth`; every other garment is
+   `cloth & ~matte`, so **the pieces are gap-free by construction** - there is
+   no boundary for the model to draw badly and no sliver of unclaimed cloth.
+   When more than one garment remains, the old seam detector cuts that
+   remainder; when exactly one remains it takes all of it. A single-garment
+   outfit (W17) accepts a whole-cloth matte as the answer.
+
+`tools/sync_manifest.py` re-pins `pieces.json` (image path + per-piece status)
+from the files actually on disk, and reports anything still missing. Run it
+last, before every push. `tools/build_batch.py` runs the image gates.
+
+Verified across all finished outfits: no two pieces overlap by more than 1%,
+no near-duplicate masks, mask union == cloth mask for every outfit (0 gaps),
+every mask 768x1376 8-bit greyscale. Empty masks are deliberate: they mark a
+garment that is fully hidden by an outer layer (`z: 0` in `pieces.json`) -
+recolour it with its parent, never independently.
+
+**Outstanding:** M4 (4-piece suit) and M9 (sherwani kurta under the coat) - the
+model floods the whole figure for these two. Everything else ships.

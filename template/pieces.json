@@ -26,7 +26,8 @@
      "mask": "universal-masking/M1-trousers-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "M2",
@@ -53,7 +54,8 @@
      "mask": "universal-masking/M2-chinos-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "M3",
@@ -80,7 +82,8 @@
      "mask": "universal-masking/M3-shirt-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "M4",
@@ -113,7 +116,8 @@
      "mask": "universal-masking/M4-shirt-mask.png",
      "status": "pending"
     }
-   ]
+   ],
+   "masks": 0
   },
   {
    "id": "M5",
@@ -140,7 +144,8 @@
      "mask": "universal-masking/M5-shirt-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "M6",
@@ -161,7 +166,8 @@
      "mask": "universal-masking/M6-pajama-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "M7",
@@ -182,7 +188,8 @@
      "mask": "universal-masking/M7-dhoti-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "M8",
@@ -209,7 +216,8 @@
      "mask": "universal-masking/M8-pajama-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "M9",
@@ -236,7 +244,8 @@
      "mask": "universal-masking/M9-churidar-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "M10",
@@ -263,7 +272,8 @@
      "mask": "universal-masking/M10-trousers-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "M11",
@@ -296,7 +306,8 @@
      "mask": "universal-masking/M11-patka-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 4
   },
   {
    "id": "M12",
@@ -309,15 +320,16 @@
      "piece": "polo",
      "z": 1,
      "mask": "universal-masking/M12-polo-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "jeans",
      "z": 1,
      "mask": "universal-masking/M12-jeans-mask.png",
-     "status": "pending"
+     "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "M13",
@@ -338,7 +350,8 @@
      "mask": "universal-masking/M13-trousers-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "M14",
@@ -359,7 +372,8 @@
      "mask": "universal-masking/M14-pants-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "M15",
@@ -386,7 +400,8 @@
      "mask": "universal-masking/M15-trousers-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "W1",
@@ -407,7 +422,8 @@
      "mask": "universal-masking/W1-blouse-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W2",
@@ -434,7 +450,8 @@
      "mask": "universal-masking/W2-dupatta-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "W3",
@@ -455,7 +472,8 @@
      "mask": "universal-masking/W3-salwar-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W4",
@@ -468,21 +486,22 @@
      "piece": "kurti",
      "z": 1,
      "mask": "universal-masking/W4-kurti-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "salwar",
      "z": 1,
      "mask": "universal-masking/W4-salwar-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "dupatta",
      "z": 1,
      "mask": "universal-masking/W4-dupatta-mask.png",
-     "status": "pending"
+     "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "W5",
@@ -495,15 +514,16 @@
      "piece": "kurta",
      "z": 1,
      "mask": "universal-masking/W5-kurta-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "palazzo",
      "z": 1,
      "mask": "universal-masking/W5-palazzo-mask.png",
-     "status": "pending"
+     "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W6",
@@ -530,7 +550,8 @@
      "mask": "universal-masking/W6-dupatta-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "W7",
@@ -551,7 +572,8 @@
      "mask": "universal-masking/W7-gharara-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W8",
@@ -566,7 +588,8 @@
      "mask": "universal-masking/W8-gown-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 1
   },
   {
    "id": "W9",
@@ -581,7 +604,8 @@
      "mask": "universal-masking/W9-maxi-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 1
   },
   {
    "id": "W10",
@@ -596,7 +620,8 @@
      "mask": "universal-masking/W10-midi-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 1
   },
   {
    "id": "W11",
@@ -611,7 +636,8 @@
      "mask": "universal-masking/W11-jumpsuit-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 1
   },
   {
    "id": "W12",
@@ -632,7 +658,8 @@
      "mask": "universal-masking/W12-skirt-mask.png",
      "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W13",
@@ -645,21 +672,22 @@
      "piece": "blazer",
      "z": 1,
      "mask": "universal-masking/W13-blazer-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "top",
      "z": 1,
      "mask": "universal-masking/W13-top-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "trousers",
      "z": 1,
      "mask": "universal-masking/W13-trousers-mask.png",
-     "status": "pending"
+     "status": "built"
     }
-   ]
+   ],
+   "masks": 3
   },
   {
    "id": "W14",
@@ -672,15 +700,16 @@
      "piece": "top",
      "z": 1,
      "mask": "universal-masking/W14-top-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "trousers",
      "z": 1,
      "mask": "universal-masking/W14-trousers-mask.png",
-     "status": "pending"
+     "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W15",
@@ -702,7 +731,8 @@
      "status": "built",
      "note": "self-fabric tie, same colour as the kaftan - not independently recolourable"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W16",
@@ -715,42 +745,33 @@
      "piece": "top",
      "z": 1,
      "mask": "universal-masking/W16-top-mask.png",
-     "status": "pending"
+     "status": "built"
     },
     {
      "piece": "jeans",
      "z": 1,
      "mask": "universal-masking/W16-jeans-mask.png",
-     "status": "pending"
+     "status": "built"
     }
-   ]
+   ],
+   "masks": 2
   },
   {
    "id": "W17",
    "group": "women",
-   "name": "Indo-Western Draped Co-Ord",
-   "slug": "indo-western-drape",
-   "image": "base/W17-indo-western-drape.jpg",
+   "name": "Floor-Length Gown (re-pinned from 'Let AI Decide')",
+   "slug": "let-ai-decide",
+   "image": "base/W17-let-ai-decide.jpg",
    "pieces": [
     {
-     "piece": "crop-jacket",
+     "piece": "gown",
      "z": 1,
-     "mask": "universal-masking/W17-crop-jacket-mask.png",
-     "status": "no-base"
-    },
-    {
-     "piece": "draped-skirt",
-     "z": 1,
-     "mask": "universal-masking/W17-draped-skirt-mask.png",
-     "status": "no-base"
-    },
-    {
-     "piece": "palazzo",
-     "z": 1,
-     "mask": "universal-masking/W17-palazzo-mask.png",
-     "status": "no-base"
+     "mask": "universal-masking/W17-gown-mask.png",
+     "status": "built"
     }
-   ]
+   ],
+   "note": "the generated 'let AI decide' frame turned out to be a single floor-length gown, not the 3-piece set first listed; one garment = one mask",
+   "masks": 1
   }
  ]
 }
