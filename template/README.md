@@ -43,7 +43,9 @@ pixels stay untouched. Masks are zero-skin/zero-background by construction.
 All 32 `base/` masters are regenerated clean (the systemic fabric static/glitch artifact that was
 baked into the original batch is gone — it had propagated into every tone copy made from a base).
 
-Tone folders: **71 of 192 images verified fresh** (derived from a fixed base, and not a pixel copy).
+Tone folders: **68 of 192 images verified fresh** (derived from a fixed base AND not a pixel copy of
+base). A naive git-history check passes 71, but 3 of those are the `light-tan` placeholders listed
+below, so 71 - 3 = 68 is the real count.
 
 | State | Garments |
 |---|---|
