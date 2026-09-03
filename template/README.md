@@ -54,20 +54,36 @@ Tone anchors (target face-patch luminance): fair 174, light-warm 158, light-tan 
 medium-brown 111, deep 80, ebony 67.
 
 ### Counts
-- **87 of 192 tone images pass all six checks.**
-- **105 generations remain** = 102 stale/never-generated + 3 tone re-dos.
+- **94 of 192 tone images pass all six checks.**
+- **98 generations remain** (see queue below).
 
-### QC re-do queue (present but tone/ladder off)
-| file | issue |
-|---|---|
-| `ebony/M7-kurta-dhoti.jpg` | re-done once: near-black 41.5 -> overshot light to 80.8, now collides with its `deep` (81.3). Needs ~67 |
-| `deep/M13-casual-coord.jpg` | 59.5 vs anchor 80. One regeneration was WORSE (147.7, came out light-tan) and was reverted; re-do gently ("slightly lighter, keep clearly deep") |
-| `fair/M10-bandhgala.jpg` | 158.2 vs anchor 174 (-16, reads as light-warm); whole M10 light end came out ~12 pts dark |
-| `ebony/W4-salwar-suit.jpg` | accepted at 8.0 gap to deep (improved from 5.8) - borderline, revisit only if time allows |
+### QC method notes (what does NOT work — learned the hard way)
+Three automated defect proxies were tried and rejected after validation, because each produced
+false positives or missed known cases: edge-hard-jump counts inside the garment region (rises with
+skin/garment contrast, so it flags correct dark-tone files); cloth-region high-frequency percentile
+(identical bands for fresh and stale files); and base-lineage MAD against the pre-fix vs post-fix
+base blob (a diffusion re-render aligns with neither). **The gate is: visual inspection of the image
+plus a contact-sheet of all 6 tones, combined with provenance** (a tone file committed before its
+base was regenerated is treated as stale regardless of how clean it looks).
 
-### Still stale (fabric glitch inherited from pre-fix bases)
-`deep` and `ebony` of M10 were never regenerated and must be replaced for glitch reasons even though
-their tone numbers happen to be on-anchor.
+Tone numbers are still measured automatically (face-patch luminance vs the anchors below) - that
+part works and has caught several real defects.
+
+### Queue (priority order)
+1. Tone re-dos - `ebony/M10-bandhgala` (76.0, collides with its `deep` 78.5), `light-tan/M11-pathani`
+   (148.6, only 5.1 from `light-warm`), `deep/M13-casual-coord` (59.5; two regens overshot in
+   opposite directions - try editing the closest on-tone sibling instead of the base).
+2. `W1-saree` all 6 tones - visually confirmed: tones carry scalloped/torn blotches on the lower
+   drape that the current base does not have; the set no longer matches its own base.
+3. `W2-lehenga-choli` 6 tones + `M11-pathani/ebony` - stale by provenance (pre-base-fix).
+4. W5 (4) then W6-W17 (72) - never generated; also overwrites the 3 `light-tan` pixel-copy
+   placeholders (W11/W14/W16) which measure as OLD-lineage.
+5. Deferred pending owner decision: `M15-let-ai-decide` 6 tones are stale by provenance but visually
+   clean on triage (12 if `M11`'s other files are counted too) - regenerate only if strict
+   base-consistency across every file is required rather than appearance-based.
+
+### Tone anchors (target face-patch luminance; +-15 tolerance, neighbours >=8 apart)
+fair 174, light-warm 158, light-tan 140, medium-brown 111, deep 80, ebony 67.
 
 ### Remaining stale / never-generated (106)
 M10, M11, M15, W1, W2 (6 tones each = 36), W5 (4), W6-W17 (12 sets x 6 = 72, incl. overwriting
