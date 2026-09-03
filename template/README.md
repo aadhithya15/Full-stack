@@ -74,14 +74,29 @@ the previous commit.
 5. no static/glitch artifact; 6. skin tone on an auto-located face patch within +-15 of its anchor and
    neighbours >=8 apart.
 
-Tone anchors (target face-patch luminance): fair 174, light-warm 158, light-tan 140, medium-brown 111,
-deep 80, ebony 67.
+### Skin-tone metric -- and why the old one passed files it should not have
+Anchors used to be read off a `face_patch` slice (top 18% of the subject bbox, central 60% of the
+width). That window includes background and collar pixels, so it reported all six tones of a batch as
+157-173 regardless of the actual skin, and it made an over-dark re-tone look on-anchor. Tones are now
+measured on the **saturated upper-third skin cluster** only: pixels with saturation >18 and |L-128| >18
+within the top 45% of the frame (head and shoulders), which needs >=500 pixels and ignores background,
+cloth and the wall.
 
-### Counts (recounted from disk, 2026-09-03)
+Catalogue medians on that metric (target per tone, tolerance +-15, neighbours must stay >=8 apart --
+cross-garment std is 5-11, so +-15 is about 1.5-2 sigma):
+  fair: 179.3
+  light-warm: 162.6
+  light-tan: 146.9
+  medium-brown: 98.1
+  deep: 72.9
+  ebony: 63.6
+
+
+### Counts (recounted from disk, not from a log)
 - 32 `base/` masters: all clean, all pass the backdrop gate.
-- **101 of 192 tone images usable**; 123 tone files present, of which 22 are present-but-stale-fabric.
-- **91 remain** = 69 never generated + 22 stale fabric (W1 `light-tan`/`deep`/`ebony`, all six of W2,
-  W5 `light-tan`, and the 12 `light-tan` placeholder copies in W6-W17).
+- **101 of 192 tone images usable** (126 tone files present, 22 carry pre-fix fabric and 3 fail the skin-tone metric).
+- **91 remain** = 66 never generated + 22 present-but-stale-fabric + 3 off-tone (M15/light-tan, M3/light-tan, W3/medium-brown).
+- Stale fabric: W1/deep, W1/ebony, W1/light-tan, W10/light-tan, W11/light-tan, W12/light-tan, W13/light-tan, W14/light-tan, W15/light-tan, W16/light-tan, W17/light-tan, W2/deep, W2/ebony, W2/fair, W2/light-tan, W2/light-warm, W2/medium-brown, W5/light-tan, W6/light-tan, W7/light-tan, W8/light-tan, W9/light-tan.
 - No two tone files in the catalogue are byte-identical (0 duplicate groups).
 
 ### `M15-let-ai-decide` re-cut (outfit, not backdrop)
