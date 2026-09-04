@@ -318,7 +318,8 @@
      "status": "built"
     }
    ],
-   "masks": 4
+   "masks": 4,
+   "status": "pending"
   },
   {
    "id": "M12",
@@ -340,7 +341,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "M13",
@@ -362,7 +364,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "M14",
@@ -384,7 +387,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "M15",
@@ -412,7 +416,8 @@
      "status": "built"
     }
    ],
-   "masks": 3
+   "masks": 3,
+   "status": "pending"
   },
   {
    "id": "W1",
@@ -434,7 +439,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W2",
@@ -462,7 +468,8 @@
      "status": "built"
     }
    ],
-   "masks": 3
+   "masks": 3,
+   "status": "pending"
   },
   {
    "id": "W3",
@@ -484,7 +491,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W4",
@@ -512,7 +520,8 @@
      "status": "built"
     }
    ],
-   "masks": 3
+   "masks": 3,
+   "status": "pending"
   },
   {
    "id": "W5",
@@ -534,7 +543,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W6",
@@ -562,7 +572,8 @@
      "status": "built"
     }
    ],
-   "masks": 3
+   "masks": 3,
+   "status": "pending"
   },
   {
    "id": "W7",
@@ -584,7 +595,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W8",
@@ -600,7 +612,8 @@
      "status": "built"
     }
    ],
-   "masks": 1
+   "masks": 1,
+   "status": "pending"
   },
   {
    "id": "W9",
@@ -616,7 +629,8 @@
      "status": "built"
     }
    ],
-   "masks": 1
+   "masks": 1,
+   "status": "pending"
   },
   {
    "id": "W10",
@@ -632,7 +646,8 @@
      "status": "built"
     }
    ],
-   "masks": 1
+   "masks": 1,
+   "status": "pending"
   },
   {
    "id": "W11",
@@ -648,7 +663,8 @@
      "status": "built"
     }
    ],
-   "masks": 1
+   "masks": 1,
+   "status": "pending"
   },
   {
    "id": "W12",
@@ -670,7 +686,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W13",
@@ -698,7 +715,8 @@
      "status": "built"
     }
    ],
-   "masks": 3
+   "masks": 3,
+   "status": "pending"
   },
   {
    "id": "W14",
@@ -720,7 +738,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W15",
@@ -743,7 +762,8 @@
      "note": "self-fabric tie, same colour as the kaftan - not independently recolourable"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W16",
@@ -765,7 +785,8 @@
      "status": "built"
     }
    ],
-   "masks": 2
+   "masks": 2,
+   "status": "pending"
   },
   {
    "id": "W17",
@@ -782,7 +803,8 @@
     }
    ],
    "note": "the generated 'let AI decide' frame turned out to be a single floor-length gown, not the 3-piece set first listed; one garment = one mask",
-   "masks": 1
+   "masks": 1,
+   "status": "pending"
   }
  ]
 }
