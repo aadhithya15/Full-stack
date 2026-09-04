@@ -95,6 +95,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", default="")
     ap.add_argument("--out", default=os.path.join(ROOT, "template", "_qc", "masks-proof.png"))
+    ap.add_argument("--scale", type=float, default=0.30,
+                    help="cell width as a fraction of 768; raise it to inspect one batch")
     a = ap.parse_args()
     if a.ids:
         ids = a.ids.split(",")
@@ -105,7 +107,10 @@ def main():
     if not ids:
         print("nothing masked yet", file=sys.stderr)
         return 1
-    print("sheet", build(ids, a.out), "->", os.path.relpath(a.out, ROOT))
+    print("sheet", build(ids, a.out, scale=a.scale), "->", os.path.relpath(a.out, ROOT))
+    if a.scale != 0.30:
+        print("sheet only: skipping the full re-run")
+        return 0
     r = subprocess.run([sys.executable, os.path.join(ROOT, "template", "tools", "mask_code.py"),
                         "--sheet", os.path.join(ROOT, "template", "_qc", "code-proof.png")],
                        capture_output=True, text=True)

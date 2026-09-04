@@ -30,9 +30,12 @@ Rules enforced here (a violation rejects the outfit; it never ships a best effor
      cannot jump garments; pixels matching nothing are "uncoded".
   K3 a designated colour must own a real region (>= 2% of coded cloth) - if the
      model forgot the waistcoat, say so instead of inventing one.
-  K4 role geometry: green's centre of mass must be below rose's, blue between them.
-     A swap means the model mis-assigned garments, which would silently put the
-     customer's trouser colour on the jacket.
+  K4 role geometry, written only in terms of what garment geometry guarantees: the lower
+     garment's rows must reach below the upper garment's, and no coded upper/middle garment
+     may sit wholly below the lower one. Both are colour-count agnostic. (An earlier version
+     asserted "the middle layer sits between top and bottom" and rejected a correct
+     three-piece suit, because a jacket's sleeves drag its centre of mass below its own
+     waistcoat's - the rule was wrong, not the image.)
   K5 zero pixels of any piece inside the head box.
   K6 off-palette guard: saturated non-skin pixels matching no code colour mean the
      model drifted or painted a fourth garment.
@@ -60,7 +63,28 @@ TPL = os.path.join(ROOT, "template")
 CODE = {"rose": (194, 38, 143), "blue": (31, 95, 196), "green": (30, 142, 62)}
 SKIN_HUE = 25          # degrees; Indian skin measured 18-32 on these masters
 HUE_CAP = 40.0         # a piece pixel must be within this of ITS code hue
-ORDER = ["rose", "blue", "green"]          # outermost/top -> middle -> bottom
+# Lab radius inside which a pixel may be called a code colour, and the margin it must beat
+# the runner-up by. The cap was 52 until deep-fold shading in W1's silk saree measured
+# 60-70 and left 15859px of the garment unowned. It can be loosened because warm skin is
+# kept out by the HUE veto, not by this number: measured distances put skin 67 from rose,
+# 69 from green and 88 from blue, so the cap was never what protected the face - and the
+# bright backdrop is 71 from rose. What must stay tight is the MARGIN, which is the only
+# thing separating two garments that touch.
+CAP = 72.0
+MARGIN = 9.0
+SEED = 40.0            # a pixel this close to its code colour needs no help to be claimed
+MIN_CODE_SEP = 55.0    # palette floor: below this two codes cannot be told apart at all
+# front-to-back / top-to-bottom. This list is also the claiming order and the label
+# numbering, so a colour missing here is invisible to the classifier.
+ORDER = ["rose", "blue", "green"]
+# A fourth colour was tried for four-piece outfits (M11's kurta as violet) and K10 below is
+# what it exists to catch: violet measured 42.8 Lab from rose while the classifier's own cap
+# is 52, so a fifth of that kurta silently belonged to the jacket. Two code colours closer
+# apart reliably (MIN_CODE_SEP below), so the palette stays at three and a fourth garment in
+# an outfit ships as z:0, recoloured with its neighbour. rose/blue measure 62 and five
+# approved outfits depend on that pair, which is why the floor sits at 55 and why the real
+# test of a palette is the shading-jitter gate in K10, not this number.
+
 LABEL_OF = {n: i + 1 for i, n in enumerate(ORDER)}
 
 
@@ -142,9 +166,28 @@ def classify(rgb, codes):
     hd = np.stack([np.minimum(np.abs(deg - code_deg[c]), 360 - np.abs(deg - code_deg[c]))
                    for c in codes], 0)
     hd_best = np.take_along_axis(hd, nearest[None, ...], 0)[0]
-    ok = (d1 < 52) & ((d2 - d1) > 9) & (hd_best < HUE_CAP)
-    lm = np.where(ok, (nearest + 1).astype(np.uint8), np.uint8(0)).astype(np.uint8)
-    return lm, d1
+    marg = d2 - d1                                     # runner-up margin, >0 means a winner
+    hue_ok = hd_best < HUE_CAP
+    lm = np.where((d1 < CAP) & (marg > MARGIN) & hue_ok,
+                  (nearest + 1).astype(np.uint8), np.uint8(0)).astype(np.uint8)
+
+    # Grow each colour only from confident seeds. Widening the Lab cap to catch deep fold
+    # shading in W1's silk saree also let a lock of hair over the shoulder qualify as rose,
+    # which put 4041px of hair inside a garment mask. A chroma floor was the obvious fix and
+    # is wrong: lit hair strands measured 103 there while the saree's own darkest folds
+    # measured 87, so no threshold separates them. What DOES separate them is connectivity -
+    # a fold is cloth because it is surrounded by cloth, an occluder is not. Geodesic
+    # reconstruction inside the loose region, per colour, keeps the fold and drops the blob,
+    # and it stays a pure function of the colour map, so the tone-invariance argument holds.
+    seed = (d1 < SEED) & hue_ok
+    for i in range(len(codes)):
+        lab_i = i + 1
+        grow = (lm == lab_i)
+        if grow.any() and seed[grow].mean() < 0.6:      # only re-grow genuinely loose regions
+            keep = ndimage.binary_propagation(seed & (d1 < CAP), mask=grow,
+                                               structure=np.ones((3, 3)))
+            lm = np.where(grow & ~keep, np.uint8(0), lm)
+    return lm, d1, marg
 
 
 def hue_report(rgb, codes):
@@ -178,7 +221,7 @@ def lab_of(codes):
     return {c: i + 1 for i, c in enumerate(codes)}
 
 
-def _assemble(by_label, vis, role, h, w):
+def _assemble(by_label, vis, role, h, w, occ=None):
     """Colour masks -> piece masks: front-to-back claiming, then speckle removal.
 
     Kept as one function because the tone-invariance proof must apply EXACTLY this to the
@@ -200,6 +243,23 @@ def _assemble(by_label, vis, role, h, w):
             keep_i = [i for i in range(1, n_i + 1)
                       if sz_i[i] >= 0.0015 * max(1, int(msk.sum())) or sz_i[i] == big]
             msk = np.isin(lab_i, keep_i)
+        # Thin creases inside a garment are unclaimed colour: a deep fold line can sit
+        # outside the Lab cap, which leaves a hairline gap down the middle of the piece (W4's
+        # inner thigh, W6's sharara centre, W1's hip). Fill ONLY small holes that this colour
+        # completely surrounds - a bounded box of 34px and 0.4% of the cloth - because that is
+        # what distinguishes a fold from an enclosed background gap (an arm loop or the space
+        # between two legs is far bigger, and must stay unowned or the recolour paints air).
+        holes = ndimage.binary_fill_holes(msk) & ~msk & ~owned
+        lh, nh = ndimage.label(holes, np.ones((3, 3)))
+        if nh:
+            objs = ndimage.find_objects(lh)
+            keep = [i + 1 for i, sl in enumerate(objs)
+                    if sl is not None and max(sl[0].stop - sl[0].start, sl[1].stop - sl[1].start) <= 34
+                    and int((lh[sl] == i + 1).sum()) <= 0.004 * max(1, int(msk.sum()))]
+            if keep:
+                msk = msk | np.isin(lh, keep)
+        if occ is not None:                        # an occluder is never garment, however
+            msk = msk & ~occ                        # neatly it sits inside the cloth
         pieces[nm] = msk
         owned |= msk
     return pieces, owned
@@ -211,6 +271,12 @@ def roles_for(o):
     vis = [p["piece"] for p in o["pieces"] if p["z"]]
     if not vis:
         return {}
+    if all(p.get("code") for p in o["pieces"] if p["z"]):
+        # The manifest is the authority: each piece carries the colour it was shot in, so
+        # roles are read, not inferred. Positional inference is only the fallback for
+        # outfits that predate the code field, and it silently mislabels any outfit whose
+        # piece list is not ordered outermost-to-bottom (M11's patka sits below the kurta).
+        return {p["piece"]: p["code"] for p in o["pieces"] if p["z"]}
     if len(vis) == 1:
         return {vis[0]: "green"}                      # single garment: it is the whole outfit
     out = {vis[0]: "rose", vis[-1]: "green"}
@@ -259,7 +325,8 @@ def mask_set(rgb, o, proof=False):
     codes = [c for c in ORDER if c in role.values()]
     if not codes or not vis:
         return None, {}, ["no colour-coded pieces declared"]
-    labmap, d1 = classify(rgb, codes)
+    labmap, d1, marg = classify(rgb, codes)
+    lm_src = labmap
     Lof = lab_of(codes)
     # One label mask per colour, cleaned ONLY from its own pixels. A 3x3 median filter on
     # the shared label map looked like the tidy way to kill JPEG speckle, but it lets a
@@ -272,8 +339,52 @@ def mask_set(rgb, o, proof=False):
         msk = labmap == Lof[c]
         msk = ndimage.binary_closing(msk, np.ones((3, 3)))
         by_label[c] = msk
-    pieces, owned = _assemble(by_label, vis, role, h, w)
-    cloth = int(owned.sum())
+    # Pixels that are an occluder rather than cloth: anything in the skin hue window (5-45
+    # degrees, while the codes sit at 135, 215 and 320) and any dark near-achromatic mass
+    # connected to the head (hair). Both are computed from the frame, never from a garment,
+    # and both are carved rather than merely counted, so "no skin or hair in a mask" is a
+    # property of the output instead of a number I hope stays small. It also fixes a trap in
+    # my own crease-fill: a blazer's lapels enclose a triangle of chest skin, which is exactly
+    # what "a small hole completely surrounded by cloth" describes, and K9 rejected M2 for
+    # filling it.
+    deg_asm = np.asarray(Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("HSV"),
+                         dtype=float)[..., 0] * 360.0 / 255.0
+    skin_win = np.minimum(np.abs(deg_asm - SKIN_HUE), 360 - np.abs(deg_asm - SKIN_HUE)) < 20
+    lab_asm = lab(rgb)
+    dark = (lab_asm[..., 0] < 55) & ((rgb.max(2) - rgb.min(2)) < 34)
+    hair_asm = np.zeros((h, w), bool)
+    hb_asm = head_box(rgb)
+    if hb_asm is not None and dark.any():
+        lh, nh = ndimage.label(dark, np.ones((3, 3)))
+        sd = set(np.unique(lh[hb_asm & (lh > 0)]).tolist()) - {0}
+        if sd:
+            hair_asm = np.isin(lh, list(sd))
+    occ = (skin_win & (rgb.max(2) - rgb.min(2) > 12)) | hair_asm
+    pieces, owned = _assemble(by_label, vis, role, h, w, occ=occ)
+
+    # Carve occluding hair out of every piece. Long hair lies across the shoulder and is
+    # touching, indeed surrounded by, cloth - so no colour test can call it "not garment"
+    # without also cutting the dark folds that ARE garment (that mistake cost 4823px of
+    # W1's saree). It is separable by TOPOLOGY: the hair is one connected dark mass that
+    # contains the head. Coded cloth is chromatic everywhere, so "dark and achromatic AND
+    # connected to the head" picks out exactly the hair and nothing else, on all six
+    # complexions. A piece therefore stops where the hair covers it, which is the correct
+    # recolour behaviour: the customer's colour must not be painted onto a woman's hair.
+    lab_px = lab(rgb)
+    chroma = rgb.max(2) - rgb.min(2)
+    hair = np.zeros((h, w), bool)
+    hb_hair = head_box(rgb)
+    dark_ach = (lab_px[..., 0] < 52) & (chroma < 30)
+    if hb_hair is not None and dark_ach.any():
+        li, n_li = ndimage.label(dark_ach, np.ones((3, 3)))
+        seeds = set(np.unique(li[hb_hair & (li > 0)]).tolist()) - {0}
+        if seeds:
+            hair = np.isin(li, list(seeds))
+            for nm in list(pieces):
+                pieces[nm] = pieces[nm] & ~hair
+    owned = np.zeros((h, w), bool)
+    for nm in vis:
+        owned |= pieces[nm]
     cloth = int(owned.sum())
     labmap = np.zeros((h, w), np.uint8)               # rebuilt from the owners, so K1 is exact
     for i, nm in enumerate([n for n in vis if pieces[n].any()]):
@@ -290,10 +401,10 @@ def mask_set(rgb, o, proof=False):
         rn = [n for n, c in role.items() if c == "rose"][0]
         gn = [n for n, c in role.items() if c == "green"][0]
         if rn in cm and gn in cm and cm[gn] < cm[rn]:
-            probs.append(f"K4 {gn} (green) sits above {rn} (rose) - the model swapped the garments")
-        bn = [n for n, c in role.items() if c == "blue"]
-        if bn and bn[0] in cm and gn in cm and cm[bn[0]] > cm[gn]:
-            probs.append(f"K4 middle layer {bn[0]} sits below {gn} - the layers are inverted")
+            probs.append(f"K4 {gn} (lower garment) sits above {rn} (upper garment) - the model swapped the garments")
+        for bn in [n for n, c in role.items() if c != "green"]:
+            if bn in cm and gn in cm and cm[bn] > cm[gn]:
+                probs.append(f"K4 {bn} sits below {gn} - the layers are inverted")
     hb = head_box(rgb)
     head_px = 0
     if hb is None:
@@ -348,11 +459,39 @@ def mask_set(rgb, o, proof=False):
     if HERE not in sys.path:
         sys.path.insert(0, HERE)
     from mask_blue import skin_band
-    from mask_blue import signals as _sig
-    _, sk_h, hr_h, _, _, _ = _sig(np.clip(rgb, 0, 255).astype(np.uint8))
-    n_skin = int((own & (sk_h | hr_h) & ~ndimage.binary_dilation(~own, np.ones((3, 3)))).sum())
-    if n_skin > 0.0008 * max(1, cloth):
-        probs.append(f"K9 {n_skin}px of piece mask is skin/hair deep inside the cloth")
+    # K9: no occluder inside a piece mask. Measured against the ONE property this scheme
+    # guarantees - coded cloth is highly chromatic and mid-bright - because the obvious
+    # instrument failed here: mask_blue.signals() calls anything dark "hair", which in W1's
+    # silk saree meant every deep fold shadow (4823px of legitimate cloth, chroma 61-81,
+    # hue 353-357) was reported as an occluder. Hair and shadow are the same luminance; they
+    # are not the same colour, and the garment's colour is the thing I control.
+    # K9, now an identity rather than a hope: hair is carved above, and skin cannot be
+    # claimed at all because the hue window of every code is disjoint from the skin hue
+    # window (rose 320 +/- 40, blue 215 +/- 40, green 135 +/- 40, skin 25). Both are
+    # re-measured here so a future palette change breaks loudly instead of quietly.
+    deg_k = np.asarray(Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("HSV"),
+                       dtype=float)[..., 0] * 360.0 / 255.0
+    # Same window the carve uses, chroma included. When the two definitions differed only by
+    # the saturation term, K9 rejected M14 for 42 near-neutral pixels (chroma <= 12) that are
+    # grey cloth shading at a seam, not skin - a gate cannot reject on pixels the rule it
+    # audits deliberately allows through.
+    chroma_k = rgb.max(2) - rgb.min(2)
+    skin_hue = (np.minimum(np.abs(deg_k - SKIN_HUE), 360 - np.abs(deg_k - SKIN_HUE)) < 20) \
+        & (chroma_k > 12)
+    n_hair = int((owned & hair).sum())
+    # The veto identity is asserted on the CLASSIFIER output. Asserting it on the shipped
+    # masks was my error: by_label runs a 3x3 closing so a wavy seam does not leave 1px
+    # notches, and that closing legitimately seals over a handful of rim pixels - 1 to 88 of
+    # them per frame, always on a boundary, never a region. Measured on lm_src the number is
+    # what actually matters and must be exactly zero.
+    n_skinh = int(((lm_src > 0) & skin_hue).sum())
+    n_skinh_closed = int((owned & skin_hue).sum())
+    if n_hair:
+        probs.append(f"K9 {n_hair}px of hair left inside a piece mask after carving")
+    if n_skinh:
+        probs.append(f"K9 {n_skinh}px of skin-hued pixel claimed by the classifier - the hue veto failed")
+    if n_skinh_closed:
+        probs.append(f"K9 {n_skinh_closed}px of occluder survived the carve - carving is not a filter, it is the rule")
     met_hue = hue_report(rgb, codes)
     if met_hue:
         for c, v in met_hue.items():
@@ -361,7 +500,8 @@ def mask_set(rgb, o, proof=False):
                              f"{v['p99']}deg, {v['near_pct']}% of skin inside the hue window")
     met = {"cloth_px": cloth, "areas": {nm: int(pieces[nm].sum()) for nm in vis},
            "overlap_px": dup, "head_px": head_px, "off_palette_px": n_off,
-           "min_skin_hue_deg": met_hue, "deep_skin_px": n_skin}
+           "min_skin_hue_deg": met_hue, "hair_px": n_hair, "skin_px": n_skinh, "rim_px": n_skinh_closed,
+           "hair_carved_px": int(hair.sum())}
     for nm in hid:
         pieces[nm] = np.zeros((h, w), bool)
     if proof:
@@ -449,7 +589,9 @@ def main():
               + f"   overlap {met['overlap_px']}px  head {met['head_px']}px  off-palette {met['off_palette_px']}px"
               + (f"  tone-touched-cloth {met.get('tone_touched_cloth_px')}px" if a.proof else ""))
         ov = np.asarray(rgb, dtype=float).copy()
-        pal = {"rose": (232, 76, 140), "blue": (60, 130, 235), "green": (60, 200, 110)}
+        # built from CODE, never restated: a second palette table is how a newly added
+        # colour classifies perfectly and then crashes only the sheet.
+        pal = {c: tuple(min(255, int(v * 1.28)) for v in CODE[c]) for c in CODE}
         role = roles_for(o)
         for nm, msk in pieces.items():
             if not msk.any():

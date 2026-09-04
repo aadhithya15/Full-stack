@@ -1,54 +1,68 @@
-# HueFit — masters, tone ladder and universal piece masks
+# HueFit — masters, piece masks and the tools that prove them
 
-## The one idea that made masking exact
-Each master is photographed **wearing its colour code**: every garment is a flat solid colour,
-and which colour it is tells the pipeline which pattern piece it is.
+## The one idea that makes masking exact
+Every master is photographed **wearing its colour code**: each garment is a flat solid colour and
+the colour says which pattern piece it is.
 
 | code | hex | meaning |
 |---|---|---|
-| rose | `#C2268F` | outermost / upper garment (shirt, kurta, blazer, sherwani) |
-| blue | `#1F5FC4` | middle layer (waistcoat, kurta under a jacket, inner tunic) |
-| green | `#1E8E3E` | lower garment (trousers, pajama, dhoti, churidar) |
+| rose | `#C2268F` | outermost / upper garment (shirt, kurta, blazer, sherwani, gown) |
+| blue | `#1F5FC4` | middle layer (waistcoat, kurta under a jacket, dupatta, inner top) |
+| green | `#1E8E3E` | lower garment (trousers, pajama, dhoti, churidar, lehenga, skirt) |
 
-White shirt, dark tie, shoes and the backdrop are deliberately **uncoded** and are owned by no
-piece. `tools/mask_code.py` classifies every pixel in Lab space against those three colours, plus
-a hue-window veto, and each colour *becomes* one piece mask. A garment boundary is therefore the
-colour edge, so there is nothing to infer: no seam detection, no segmentation model, no geometry
-guessing. That is why the masks can be asserted exact rather than "probably right".
+Anything else — white shirt, dark tie, shoes, skin, hair, the backdrop sweep — is deliberately
+**uncoded** and owned by no piece. `tools/mask_code.py` classifies pixels in Lab against the codes
+and each colour *becomes* one piece mask, so a garment boundary is not detected, it is simply the
+colour edge. Nothing is inferred, which is the only reason "exact" is a fair claim here: the earlier
+single-colour-per-outfit masters forced the boundary to be guessed, and the guesses were wrong in a
+way every coverage metric passed.
 
-## Files
-* `base/<ID>-<slug>.jpg` — masters, 768x1376, sRGB, one per outfit.
-* `universal-masking/<ID>-<piece>-mask.png` — 8-bit grey, 768x1376, strictly 0 or 255, one set
-  per outfit valid for all six complexions.
-* `pieces.json` — the manifest (32 outfits / 74 pieces) and the status of each.
-* `_qc/masks-proof.png` — every master with its mask boundaries drawn, next to each piece mask.
-* `_qc/code-proof.png` — the same masters at working resolution.
-
-## Rebuild
+## What is in here
 ```
-python3 template/tools/mask_code.py            # writes + gates every mask
-python3 template/tools/mask_code.py --proof     # adds the tone-invariance gate
+base/<ID>-<slug>.jpg                     32 masters, 768x1376 sRGB  (M1-M15 menswear, W1-W17 womenswear)
+universal-masking/<ID>-<piece>-mask.png  74 masks, 8-bit L, 768x1376, strictly 0 or 255
+pieces.json                              manifest: pieces, colour code, z-order, mask path, status
+_qc/all32-overlay.png                    every master with every mask painted over it - the review sheet
+tools/mask_code.py                       classifier + gates K1-K10, writes the masks
+tools/mask_sheet.py                      builds the overlay sheet from the masks on disk
+tools/mask_blue.py                       tone harness imported by mask_code (skin band, tone ladder)
+tools/tone.py                            the six-complexion step, run per master
 ```
-Gates, all of which must report zero: K1 union == coded cloth; K3 no two pieces share a pixel;
-K4 layer order (middle never below lower); K5 no mask pixel inside the head box; K6 off-palette
-cloth under 6%; K7 the tone step moves 0 px of owned cloth; K8 any code colour present at >5% of
-coded cloth must be owned by a declared piece (this caught a kurta the manifest had forgotten);
-K9 no piece pixel is skin, and every code colour stays far from this frame's skin hue.
+5 of the 74 masks are intentionally empty (`z:0`): `M3-shirt`, `M4-shirt`, `M5-shirt`, `M9-kurta`,
+`M11-patka`. Those garments are either not visible or uncoded (a white shirt, a closed bandhgala's
+inner kurta, a waist wrap), so they are recoloured together with their parent rather than shipped
+as a fake mask.
 
-## Why one set of masks covers six skin tones
-Tones are produced from a master by `tone.py`, which edits only the skin region and never touches
-garment pixels. Gate K7 measures that claim on the shipped files: re-toning to the palest and the
-deepest complexion moves **0 px** inside any piece mask, so the base master's masks stay exact on
-all six. (The gate is deliberately stated as "no owned pixel may move" — an earlier version
-re-ran the classifier on re-toned frames, which instead measured a feather artefact of my own test
-helper and reported phantom disagreements.)
+## Rebuild and verify
+```
+python3 template/tools/mask_code.py            # derives every mask from its master, gates each one
+python3 template/tools/mask_code.py --proof    # adds tone invariance
+python3 template/tools/mask_sheet.py           # regenerates the overlay sheet
+```
+Gates. An outfit that fails any of them is rejected and ships no masks — that is a hard stop, not a
+warning: **K1** one label per pixel, so overlap and gap are identities; **K3** every code owns a
+region ≥2% of the outfit's cloth (if the model forgot the waistcoat, that is said out loud); **K4**
+lower garment reaches below upper, and no upper/middle garment sits wholly below it; **K5** zero
+pixels inside the head ellipse; **K6** off-palette cloth under 6%; **K7** the tone step moves 0 px
+of owned cloth; **K8** any code colour present at >5% of cloth must belong to a declared piece;
+**K9** skin and hair are carved out of every mask, so a mask cannot contain a face, a hand or a
+woman's hair falling across a gown; **K10** the palette must be decidable — measured by relighting
+the frame ±6% and requiring no garment to change owner.
 
-## Status
-M1-M10 masked and gated. M11-M15 and W1-W17 need colour-coded masters in the same scheme, then
-the 6-tone folders, then masks derive themselves.
+## Why one mask set is valid for all six complexions
+Tones are made from a master by editing the skin region only; garment pixels are bit-identical.
+Gate K7 measures exactly that on the shipped files, so the masks derived once from the master stay
+correct across fair → ebony. Two rules make it hold rather than nearly hold: hue-window rejection
+(dark complexions drift in Lab toward a code colour, and skin's hue never does), and hard-stopping
+the feather of the tone blend at the garment edge.
 
-## Known limit
-Uncoded items are not recolourable, by design: where a shirt is white it ships as an empty mask
-with `z:0` (`M3-shirt`, `M4-shirt`, `M5-shirt`) and is recoloured together with its parent; M2's
-blue-coded shirt has a real mask. If white shirts must be recolourable, regenerate those masters
-with the shirt coded and re-run `mask_code.py`.
+## Known, on purpose
+* Figure scale varies a little between outfits (e.g. `M14`, `W13` are framed smaller than `M12`).
+  Masks follow the frame, so nothing breaks; the catalogue grid just needs the same card crop.
+* Thin fold shading is left unclaimed rather than grabbed by an aggressive threshold: 2.3k–9.4k px
+  per outfit, all inside the garment. A recolour keeps those lines as shading, which is what real
+  cloth looks like. `mask_code._assemble` does fill small enclosed holes (≤34 px, ≤0.4% of cloth) so
+  a hairline crease does not stay unpainted, and only that — bigger enclosed gaps are backdrop
+  between an arm and a torso, and painting those would show.
+* Skin tones exist to be generated per outfit into `fair/ light-warm/ light-tan/ medium-brown/
+  deep/ ebony/` (6 × 32 = 192 frames); the masks above are shared by all six.
