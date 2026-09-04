@@ -1,0 +1,306 @@
+{
+  "summary": {
+    "base_templates_tested": 32,
+    "source_piece_masks_tested": 74,
+    "intentional_empty_z0_masks": 5,
+    "semantic_masks_tested": 58,
+    "source_overlap_pixels_max": 0,
+    "semantic_overlap_pixels_max": 0,
+    "all_valid_masks_pass_through_exactly": true,
+    "recolour_changed_outside_mask_pixels_max": 0,
+    "m4_necktie_pixels_excluded": 4212,
+    "skin_tone_images_generated": 0,
+    "uploads_performed": 0,
+    "deployments_performed": 0
+  },
+  "templates": [
+    {
+      "id": "M1",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M2",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M3",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M4",
+      "source_piece_masks": 4,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M5",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M6",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M7",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M8",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M9",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M10",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M11",
+      "source_piece_masks": 4,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M12",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M13",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M14",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "M15",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W1",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W2",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W3",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W4",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W5",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W6",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W7",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W8",
+      "source_piece_masks": 1,
+      "semantic_masks": 1,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W9",
+      "source_piece_masks": 1,
+      "semantic_masks": 1,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W10",
+      "source_piece_masks": 1,
+      "semantic_masks": 1,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W11",
+      "source_piece_masks": 1,
+      "semantic_masks": 1,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W12",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W13",
+      "source_piece_masks": 3,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W14",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W15",
+      "source_piece_masks": 2,
+      "semantic_masks": 1,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W16",
+      "source_piece_masks": 2,
+      "semantic_masks": 2,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    },
+    {
+      "id": "W17",
+      "source_piece_masks": 1,
+      "semantic_masks": 1,
+      "source_overlap_pixels": 0,
+      "semantic_overlap_pixels": 0,
+      "valid_masks_pass_through_exactly": true,
+      "changed_outside_mask_pixels": 0
+    }
+  ]
+}

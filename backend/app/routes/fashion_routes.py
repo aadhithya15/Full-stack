@@ -1,4 +1,4 @@
-﻿"""Fashion endpoints - Phase 4: POST /api/fashion/analyze (+ history).
+"""Fashion endpoints - Phase 4: POST /api/fashion/analyze (+ history).
 
 The analyze endpoint accepts multipart/form-data (photo optional in
 Phase 4; the photo FIELD is accepted and stored, but skin-tone detection
@@ -68,7 +68,9 @@ def analyze():
         language = "en"
 
     # ---------- 1) validate inputs ----------
-    skin_tone_text = _form("skin_tone_text")
+    # Accept both the established field and the shorter selector field.
+    # When both are present, the explicit user selection wins for the model photo.
+    skin_tone_text = _form("skin_tone_text") or _form("skin_tone")
     photo = request.files.get("photo")
 
     if photo is not None and photo.filename:
@@ -163,10 +165,18 @@ def analyze():
         except Exception:
             photo_path = None  # storage hiccup shouldn't kill the analysis
 
-    # Photo detection wins; typed text is used as extra context / fallback.
+    # Detection remains useful to the stylist, but an explicit user selection
+    # controls the template model. This guarantees that a selected "dusky"
+    # user receives the dusky template variant even when a photo is also sent.
     skin_tone_for_ai = detected_from_photo or skin_tone_text or "medium neutral"
     if detected_from_photo and skin_tone_text:
-        skin_tone_for_ai = f"{detected_from_photo} (user says: {skin_tone_text})"
+        skin_tone_for_ai = f"{detected_from_photo} (user selected: {skin_tone_text})"
+
+    from app.services.skin_tone_service import canonical_tone
+
+    canonical_skin_tone = canonical_tone(
+        skin_tone_text or detected_from_photo or skin_tone_for_ai
+    )
 
     # ---------- 3) get recommendations (mock now, real AI in Phase 5) ----------
     detected_skin_tone, recos = ai_service.get_recommendations(
@@ -202,9 +212,9 @@ def analyze():
         r.pop("image_prompt", "")  # legacy field from the generation era
         r["image_url"] = None
         r["image_source"] = "none"
-        primary_hex = (r.get("dress_colors") or [{}])[0].get("hex")
+        dress_colours = r.get("dress_colors") or []
         r_dress_type = (r.get("outfit_type") or dress_type or "").strip().lower()
-        if not primary_hex:
+        if not dress_colours:
             return
         try:
             tpl = pick_template(
@@ -213,7 +223,11 @@ def analyze():
                 culture=culture_for_template,
             )
             if tpl is not None:
-                url = render_recommendation(tpl, primary_hex)
+                url = render_recommendation(
+                    tpl,
+                    dress_colours,
+                    skin_tone=canonical_skin_tone,
+                )
                 if url:
                     r["image_url"] = url
                     r["image_source"] = "template"
@@ -256,6 +270,7 @@ def analyze():
             "success": True,
             "analysis_id": analysis["id"],
             "detected_skin_tone": detected_skin_tone,
+            "canonical_tone": canonical_skin_tone,
             "mock": is_mock,
             "language": language,
             "recommendations": [

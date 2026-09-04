@@ -1,3 +1,2 @@
-﻿template_code,dress_type,gender,culture,style_tags,base_hue_family,image_file,mask_file,notes
-saree_f_01,saree,female,tamil,traditional;festive,maroon-red,saree_f_01.jpg,saree_f_01_mask.png,classic drape front pose
-kurta_m_01,kurta-pajama,male,tamil,traditional,white-cream,kurta_m_01.jpg,kurta_m_01_mask.png,
+template_code,dress_type,gender,culture,style_tags,base_hue_family,image_file,mask_file,mask2_file,mask3_file,tone_variants,notes
+saree_f_01,saree,female,tamil,traditional;festive,,saree_f_01.jpg,saree_f_01_mask.png,saree_f_01_mask2.png,,"{""dusky"":""saree_f_01__dusky.jpg"",""fair"":""saree_f_01__fair.jpg""}",example only

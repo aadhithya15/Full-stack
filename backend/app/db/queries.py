@@ -220,96 +220,26 @@ def delete_closet_item(user_id: str, item_id: str) -> dict[str, Any] | None:
     return res.data[0] if res.data else None
 
 
-# ---------------------------------------------------- v2 product catalogue
-
-
-def get_or_create_client(name: str) -> dict[str, Any]:
-    """Find a catalogue client by name, creating it if new."""
-    sb = get_supabase()
-    res = (
-        sb.table("catalog_clients").select("*").eq("name", name).limit(1).execute()
-    )
-    if res.data:
-        return res.data[0]
-    res = sb.table("catalog_clients").insert({"name": name}).execute()
-    return res.data[0]
-
-
-def upsert_product(client_id: str, fields: dict[str, Any]) -> dict[str, Any]:
-    """Insert or update one product row (identified by client + title)."""
-    sb = get_supabase()
-    existing = (
-        sb.table("products")
-        .select("id")
-        .eq("client_id", client_id)
-        .eq("title", fields.get("title"))
-        .limit(1)
-        .execute()
-    )
-    row = {**fields, "client_id": client_id}
-    if existing.data:
-        res = (
-            sb.table("products")
-            .update(row)
-            .eq("id", existing.data[0]["id"])
-            .execute()
-        )
-    else:
-        res = sb.table("products").insert(row).execute()
-    return res.data[0]
-
-
-def count_products(client_id: str | None = None) -> int:
-    sb = get_supabase()
-    q = sb.table("products").select("id", count="exact").limit(0)
-    if client_id:
-        q = q.eq("client_id", client_id)
-    return q.execute().count or 0
-
-
-def search_products_by_vector(
-    embedding: list[float],
-    gender: str | None = None,
-    culture: str | None = None,
-    occasion: str | None = None,
-    limit: int = 15,
-) -> list[dict[str, Any]]:
-    """Nearest-neighbour search over product embeddings via the RPC helper.
-
-    Uses the match_products SQL function (created in migration 006b) so the
-    HNSW index is applied server-side. Returns rows with a `similarity`
-    column (1.0 = identical direction, 0.0 = unrelated).
-    """
-    sb = get_supabase()
-    res = sb.rpc(
-        "match_products",
-        {
-            "query_embedding": embedding,
-            "match_count": limit,
-            "filter_gender": gender,
-            "filter_culture": culture,
-            "filter_occasion": occasion,
-        },
-    ).execute()
-    return res.data or []
-
-
-def list_products(client_id: str | None = None, limit: int = 100) -> list[dict[str, Any]]:
-    sb = get_supabase()
-    q = sb.table("products").select(
-        "id, title, gender, dress_type, culture, occasions, dominant_hex, "
-        "hue_family, tags, price, currency, image_url, buy_url, in_stock, indexed_at"
-    ).limit(limit)
-    if client_id:
-        q = q.eq("client_id", client_id)
-    return q.execute().data or []
-
-
 # ------------------------------------------------------- outfit templates
 
 
 def upsert_template(fields: dict[str, Any]) -> dict[str, Any]:
-    """Insert or update a template row (identified by template_code)."""
+    """Insert or update a template row (identified by template_code).
+
+    Retries without mask2_url/mask2_region if migration 009 has not been
+    applied yet (same degrade-gracefully rule as insert_recommendations).
+    """
+    try:
+        return _upsert_template_raw(fields)
+    except Exception as exc:
+        msg = str(exc).lower()
+        optional = {f for f in ("mask2_url", "mask2_region", "mask3_url", "mask3_region") if f in msg}
+        if not optional:
+            raise
+        return _upsert_template_raw({k: v for k, v in fields.items() if k not in optional})
+
+
+def _upsert_template_raw(fields: dict[str, Any]) -> dict[str, Any]:
     sb = get_supabase()
     code = fields.get("template_code")
     existing = (

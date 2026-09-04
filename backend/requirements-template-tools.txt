@@ -1,0 +1,3 @@
+# One-time offline template preparation and QA dependency.
+# Production runtime does not import scipy.
+scipy>=1.11,<2

@@ -1,0 +1,800 @@
+{
+  "summary": {
+    "status": "PASS",
+    "github_main_commit": "d7d2ade67432d064aa8dc0d291e80cb9e2434794",
+    "templates_installed": 32,
+    "source_piece_masks_installed": 74,
+    "intentional_empty_z0_masks": 5,
+    "semantic_runtime_masks_installed": 58,
+    "mask_overlap_pixels_max": 0,
+    "all_valid_masks_pass_through_exactly": true,
+    "recolour_changed_outside_mask_pixels_max": 0,
+    "m4_necktie_pixels_removed": 4212,
+    "skin_colours_installed": 1,
+    "additional_skin_tones_generated": 0,
+    "uploads_performed": 0,
+    "deployments_performed": 0
+  },
+  "templates": [
+    {
+      "template_code": "shirt-trousers_m_01",
+      "source_id": "M1",
+      "dress_type": "shirt-trousers",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "formal"
+      ],
+      "image_file": "current/base/M1-shirt-trousers.jpg",
+      "mask_file": "current-runtime/shirt-trousers_m_01_mask.png",
+      "mask2_file": "current-runtime/shirt-trousers_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "shirt"
+        ],
+        [
+          "trousers"
+        ]
+      ]
+    },
+    {
+      "template_code": "blazer-chinos_m_01",
+      "source_id": "M2",
+      "dress_type": "blazer-chinos",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "formal",
+        "smart-casual"
+      ],
+      "image_file": "current/base/M2-blazer-chinos.jpg",
+      "mask_file": "current-runtime/blazer-chinos_m_01_mask.png",
+      "mask2_file": "current-runtime/blazer-chinos_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "blazer",
+          "chinos"
+        ],
+        [
+          "shirt"
+        ]
+      ]
+    },
+    {
+      "template_code": "two-piece-suit_m_01",
+      "source_id": "M3",
+      "dress_type": "two-piece-suit",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "formal"
+      ],
+      "image_file": "current/base/M3-two-piece-suit.jpg",
+      "mask_file": "current-runtime/two-piece-suit_m_01_mask.png",
+      "mask2_file": "current-runtime/two-piece-suit_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "jacket"
+        ],
+        [
+          "trousers"
+        ]
+      ]
+    },
+    {
+      "template_code": "three-piece-suit_m_01",
+      "source_id": "M4",
+      "dress_type": "three-piece-suit",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "formal"
+      ],
+      "image_file": "current/base/M4-three-piece-suit.jpg",
+      "mask_file": "current-runtime/three-piece-suit_m_01_mask.png",
+      "mask2_file": "current-runtime/three-piece-suit_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "jacket",
+          "trousers"
+        ],
+        [
+          "waistcoat"
+        ]
+      ]
+    },
+    {
+      "template_code": "tuxedo_m_01",
+      "source_id": "M5",
+      "dress_type": "tuxedo",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "formal",
+        "party"
+      ],
+      "image_file": "current/base/M5-tuxedo.jpg",
+      "mask_file": "current-runtime/tuxedo_m_01_mask.png",
+      "mask2_file": "current-runtime/tuxedo_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "jacket"
+        ],
+        [
+          "trousers"
+        ]
+      ]
+    },
+    {
+      "template_code": "kurta-pajama_m_01",
+      "source_id": "M6",
+      "dress_type": "kurta-pajama",
+      "gender": "male",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional"
+      ],
+      "image_file": "current/base/M6-kurta-pajama.jpg",
+      "mask_file": "current-runtime/kurta-pajama_m_01_mask.png",
+      "mask2_file": "current-runtime/kurta-pajama_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kurta"
+        ],
+        [
+          "pajama"
+        ]
+      ]
+    },
+    {
+      "template_code": "kurta-dhoti_m_01",
+      "source_id": "M7",
+      "dress_type": "kurta-dhoti",
+      "gender": "male",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional",
+        "festive"
+      ],
+      "image_file": "current/base/M7-kurta-dhoti.jpg",
+      "mask_file": "current-runtime/kurta-dhoti_m_01_mask.png",
+      "mask2_file": "current-runtime/kurta-dhoti_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kurta"
+        ],
+        [
+          "dhoti"
+        ]
+      ]
+    },
+    {
+      "template_code": "nehru-jacket_m_01",
+      "source_id": "M8",
+      "dress_type": "nehru-jacket",
+      "gender": "male",
+      "culture": "fusion",
+      "style_tags": [
+        "formal",
+        "festive"
+      ],
+      "image_file": "current/base/M8-nehru-jacket-kurta.jpg",
+      "mask_file": "current-runtime/nehru-jacket_m_01_mask.png",
+      "mask2_file": "current-runtime/nehru-jacket_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "nehru-jacket",
+          "pajama"
+        ],
+        [
+          "kurta"
+        ]
+      ]
+    },
+    {
+      "template_code": "sherwani_m_01",
+      "source_id": "M9",
+      "dress_type": "sherwani",
+      "gender": "male",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional",
+        "festive"
+      ],
+      "image_file": "current/base/M9-sherwani.jpg",
+      "mask_file": "current-runtime/sherwani_m_01_mask.png",
+      "mask2_file": "current-runtime/sherwani_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "sherwani"
+        ],
+        [
+          "churidar"
+        ]
+      ]
+    },
+    {
+      "template_code": "bandhgala_m_01",
+      "source_id": "M10",
+      "dress_type": "bandhgala",
+      "gender": "male",
+      "culture": "fusion",
+      "style_tags": [
+        "formal",
+        "festive"
+      ],
+      "image_file": "current/base/M10-bandhgala.jpg",
+      "mask_file": "current-runtime/bandhgala_m_01_mask.png",
+      "mask2_file": "current-runtime/bandhgala_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "jacket",
+          "churidar"
+        ],
+        [
+          "kurta"
+        ]
+      ]
+    },
+    {
+      "template_code": "pathani-suit_m_01",
+      "source_id": "M11",
+      "dress_type": "pathani-suit",
+      "gender": "male",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional"
+      ],
+      "image_file": "current/base/M11-pathani.jpg",
+      "mask_file": "current-runtime/pathani-suit_m_01_mask.png",
+      "mask2_file": "current-runtime/pathani-suit_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "jacket"
+        ],
+        [
+          "kurta",
+          "churidar"
+        ]
+      ]
+    },
+    {
+      "template_code": "polo-jeans_m_01",
+      "source_id": "M12",
+      "dress_type": "polo-jeans",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "casual"
+      ],
+      "image_file": "current/base/M12-polo-jeans.jpg",
+      "mask_file": "current-runtime/polo-jeans_m_01_mask.png",
+      "mask2_file": "current-runtime/polo-jeans_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "polo"
+        ],
+        [
+          "jeans"
+        ]
+      ]
+    },
+    {
+      "template_code": "casual-coord_m_01",
+      "source_id": "M13",
+      "dress_type": "casual-coord",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "casual"
+      ],
+      "image_file": "current/base/M13-casual-coord.jpg",
+      "mask_file": "current-runtime/casual-coord_m_01_mask.png",
+      "mask2_file": "current-runtime/casual-coord_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "top"
+        ],
+        [
+          "trousers"
+        ]
+      ]
+    },
+    {
+      "template_code": "formal-shirt-pants_m_01",
+      "source_id": "M14",
+      "dress_type": "formal-shirt-pants",
+      "gender": "male",
+      "culture": "western",
+      "style_tags": [
+        "formal"
+      ],
+      "image_file": "current/base/M14-formal-shirt-pants.jpg",
+      "mask_file": "current-runtime/formal-shirt-pants_m_01_mask.png",
+      "mask2_file": "current-runtime/formal-shirt-pants_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "shirt"
+        ],
+        [
+          "pants"
+        ]
+      ]
+    },
+    {
+      "template_code": "kurta-jacket-tapered_m_01",
+      "source_id": "M15",
+      "dress_type": "kurta-jacket-tapered",
+      "gender": "male",
+      "culture": "fusion",
+      "style_tags": [
+        "formal",
+        "festive"
+      ],
+      "image_file": "current/base/M15-kurta-jacket-tapered.jpg",
+      "mask_file": "current-runtime/kurta-jacket-tapered_m_01_mask.png",
+      "mask2_file": "current-runtime/kurta-jacket-tapered_m_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kurta-jacket",
+          "trousers"
+        ],
+        [
+          "belt-sash"
+        ]
+      ]
+    },
+    {
+      "template_code": "saree_f_01",
+      "source_id": "W1",
+      "dress_type": "saree",
+      "gender": "female",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional",
+        "festive"
+      ],
+      "image_file": "current/base/W1-saree.jpg",
+      "mask_file": "current-runtime/saree_f_01_mask.png",
+      "mask2_file": "current-runtime/saree_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "saree-drape"
+        ],
+        [
+          "blouse"
+        ]
+      ]
+    },
+    {
+      "template_code": "lehenga-choli_f_01",
+      "source_id": "W2",
+      "dress_type": "lehenga-choli",
+      "gender": "female",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional",
+        "festive"
+      ],
+      "image_file": "current/base/W2-lehenga-choli.jpg",
+      "mask_file": "current-runtime/lehenga-choli_f_01_mask.png",
+      "mask2_file": "current-runtime/lehenga-choli_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "lehenga",
+          "dupatta"
+        ],
+        [
+          "choli"
+        ]
+      ]
+    },
+    {
+      "template_code": "anarkali_f_01",
+      "source_id": "W3",
+      "dress_type": "anarkali",
+      "gender": "female",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional",
+        "festive"
+      ],
+      "image_file": "current/base/W3-anarkali.jpg",
+      "mask_file": "current-runtime/anarkali_f_01_mask.png",
+      "mask2_file": "current-runtime/anarkali_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "anarkali"
+        ],
+        [
+          "salwar"
+        ]
+      ]
+    },
+    {
+      "template_code": "salwar-suit_f_01",
+      "source_id": "W4",
+      "dress_type": "salwar-suit",
+      "gender": "female",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional"
+      ],
+      "image_file": "current/base/W4-salwar-suit.jpg",
+      "mask_file": "current-runtime/salwar-suit_f_01_mask.png",
+      "mask2_file": "current-runtime/salwar-suit_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kurti",
+          "dupatta"
+        ],
+        [
+          "salwar"
+        ]
+      ]
+    },
+    {
+      "template_code": "kurta-palazzo_f_01",
+      "source_id": "W5",
+      "dress_type": "kurta-palazzo",
+      "gender": "female",
+      "culture": "tamil",
+      "style_tags": [
+        "casual",
+        "traditional"
+      ],
+      "image_file": "current/base/W5-kurta-palazzo.jpg",
+      "mask_file": "current-runtime/kurta-palazzo_f_01_mask.png",
+      "mask2_file": "current-runtime/kurta-palazzo_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kurta"
+        ],
+        [
+          "palazzo"
+        ]
+      ]
+    },
+    {
+      "template_code": "sharara_f_01",
+      "source_id": "W6",
+      "dress_type": "sharara",
+      "gender": "female",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional",
+        "festive"
+      ],
+      "image_file": "current/base/W6-sharara.jpg",
+      "mask_file": "current-runtime/sharara_f_01_mask.png",
+      "mask2_file": "current-runtime/sharara_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kurti",
+          "dupatta"
+        ],
+        [
+          "sharara"
+        ]
+      ]
+    },
+    {
+      "template_code": "gharara_f_01",
+      "source_id": "W7",
+      "dress_type": "gharara",
+      "gender": "female",
+      "culture": "tamil",
+      "style_tags": [
+        "traditional",
+        "festive"
+      ],
+      "image_file": "current/base/W7-gharara.jpg",
+      "mask_file": "current-runtime/gharara_f_01_mask.png",
+      "mask2_file": "current-runtime/gharara_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kurti"
+        ],
+        [
+          "gharara"
+        ]
+      ]
+    },
+    {
+      "template_code": "gown_f_01",
+      "source_id": "W8",
+      "dress_type": "gown",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "party",
+        "formal"
+      ],
+      "image_file": "current/base/W8-evening-gown.jpg",
+      "mask_file": "current-runtime/gown_f_01_mask.png",
+      "mask2_file": null,
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "gown"
+        ]
+      ]
+    },
+    {
+      "template_code": "maxi-dress_f_01",
+      "source_id": "W9",
+      "dress_type": "maxi-dress",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "casual",
+        "party"
+      ],
+      "image_file": "current/base/W9-maxi-dress.jpg",
+      "mask_file": "current-runtime/maxi-dress_f_01_mask.png",
+      "mask2_file": null,
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "maxi"
+        ]
+      ]
+    },
+    {
+      "template_code": "midi-dress_f_01",
+      "source_id": "W10",
+      "dress_type": "midi-dress",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "casual",
+        "party"
+      ],
+      "image_file": "current/base/W10-midi-dress.jpg",
+      "mask_file": "current-runtime/midi-dress_f_01_mask.png",
+      "mask2_file": null,
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "midi"
+        ]
+      ]
+    },
+    {
+      "template_code": "jumpsuit_f_01",
+      "source_id": "W11",
+      "dress_type": "jumpsuit",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "party",
+        "casual"
+      ],
+      "image_file": "current/base/W11-jumpsuit.jpg",
+      "mask_file": "current-runtime/jumpsuit_f_01_mask.png",
+      "mask2_file": null,
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "jumpsuit"
+        ]
+      ]
+    },
+    {
+      "template_code": "skirt-blouse_f_01",
+      "source_id": "W12",
+      "dress_type": "skirt-blouse",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "casual"
+      ],
+      "image_file": "current/base/W12-skirt-blouse.jpg",
+      "mask_file": "current-runtime/skirt-blouse_f_01_mask.png",
+      "mask2_file": "current-runtime/skirt-blouse_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "blouse"
+        ],
+        [
+          "skirt"
+        ]
+      ]
+    },
+    {
+      "template_code": "blazer-trousers_f_01",
+      "source_id": "W13",
+      "dress_type": "blazer-trousers",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "formal"
+      ],
+      "image_file": "current/base/W13-blazer-trousers.jpg",
+      "mask_file": "current-runtime/blazer-trousers_f_01_mask.png",
+      "mask2_file": "current-runtime/blazer-trousers_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "blazer",
+          "trousers"
+        ],
+        [
+          "top"
+        ]
+      ]
+    },
+    {
+      "template_code": "western-coord_f_01",
+      "source_id": "W14",
+      "dress_type": "western-coord",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "casual"
+      ],
+      "image_file": "current/base/W14-western-coord.jpg",
+      "mask_file": "current-runtime/western-coord_f_01_mask.png",
+      "mask2_file": "current-runtime/western-coord_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "top"
+        ],
+        [
+          "trousers"
+        ]
+      ]
+    },
+    {
+      "template_code": "kaftan_f_01",
+      "source_id": "W15",
+      "dress_type": "kaftan",
+      "gender": "female",
+      "culture": "fusion",
+      "style_tags": [
+        "casual",
+        "festive"
+      ],
+      "image_file": "current/base/W15-kaftan.jpg",
+      "mask_file": "current-runtime/kaftan_f_01_mask.png",
+      "mask2_file": null,
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "kaftan",
+          "belt"
+        ]
+      ]
+    },
+    {
+      "template_code": "jeans-top_f_01",
+      "source_id": "W16",
+      "dress_type": "jeans-top",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "casual"
+      ],
+      "image_file": "current/base/W16-jeans-top.jpg",
+      "mask_file": "current-runtime/jeans-top_f_01_mask.png",
+      "mask2_file": "current-runtime/jeans-top_f_01_mask2.png",
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "top"
+        ],
+        [
+          "jeans"
+        ]
+      ]
+    },
+    {
+      "template_code": "gown_f_02",
+      "source_id": "W17",
+      "dress_type": "floor-length-gown",
+      "gender": "female",
+      "culture": "western",
+      "style_tags": [
+        "party",
+        "formal"
+      ],
+      "image_file": "current/base/W17-let-ai-decide.jpg",
+      "mask_file": "current-runtime/gown_f_02_mask.png",
+      "mask2_file": null,
+      "mask3_file": null,
+      "tone_variants": {},
+      "base_skin_only": true,
+      "semantic_groups": [
+        [
+          "gown"
+        ]
+      ]
+    }
+  ]
+}

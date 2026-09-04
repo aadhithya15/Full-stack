@@ -1,4 +1,4 @@
-﻿"""Real AI recommendations - Gemini (primary) with Groq (fallback).
+"""Real AI recommendations - Gemini (primary) with Groq (fallback).
 
 Both providers are called over plain HTTPS with `requests` (no heavy SDKs).
 The LLM must return STRICT JSON matching our schema; we parse, validate,
@@ -361,6 +361,16 @@ Diversity rules: each outfit must differ in silhouette, fabric AND colour direct
 
 Colour rules: choose colours that genuinely flatter the given skin tone.
 Also list colours this skin tone should avoid.
+Every hex MUST be a colour real garments are actually sold in - rich, fabric-dye
+colours (maroon #7B2D3B, emerald #1B6B4A, mustard #C99A3C, navy #22335C, teal
+#1F6F78, rust #B4552D, dusty rose #C4787F, olive #6B6B35 are good examples of
+DEPTH, pick what suits the person). NEVER output neon or pure screen colours
+(no #FF00FF, #00FFFF, #FF0000-style values, nothing fluorescent).
+dress_colors order matters and must match the garments list: index 0 = the MAIN
+garment's colour (saree, kurta, blazer, dress), index 1 = the SECOND garment's
+colour (blouse, trousers, pajama, dupatta), index 2 = the THIRD piece if the
+outfit has one (waistcoat...). All colours must genuinely look good together
+on one outfit.
 
 Weather rules: fabrics must suit the weather (breathable cotton/linen for hot or humid, layers for winter).
 
