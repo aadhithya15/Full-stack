@@ -1,0 +1,92 @@
+{
+ "_comment": "Pixels the complexion step must never touch, per outfit, even though they read as warm and chromatic enough to be skin. The masters are fixed-pose renders, so a box is exact here in a way a general detector could never be: each entry was read off a gridded crop of the frame (see _qc/grid-feet.png) and checked against the before/after diff. Boxes cover (a) pale footwear, whose colour sits inside skin's own colour envelope, and (b) patches of sweep that pick up a gown's bounce light under a hem, which is warm and chromatic but is backdrop. This file only ever REMOVES pixels from the tone region; it cannot add any, and make_tones.py gate T5 verifies that nothing inside a box changed.",
+ "_units": "x0, y0, x1, y1 in master pixels, inclusive, 768x1376 frames",
+ "exclusions": {
+  "W12": [
+   {
+    "box": [
+     322,
+     1240,
+     470,
+     1302
+    ],
+    "why": "nude pumps - beige leather inside skin's own colour envelope, went grey as the face went fair; the vamp wings and the sole, not the ankle above them"
+   }
+  ],
+  "W4": [
+   {
+    "box": [
+     280,
+     1224,
+     470,
+     1305
+    ],
+    "why": "tan chappals, both feet"
+   }
+  ],
+  "W1": [
+   {
+    "box": [
+     450,
+     1195,
+     700,
+     1320
+    ],
+    "why": "the sweep patch right of the gown hem, lit by the gown's own bounce; it runs well past the fabric edge"
+   }
+  ],
+  "W11": [
+   {
+    "box": [
+     504,
+     1279,
+     575,
+     1308
+    ],
+    "why": "sweep sliver at the gown's hem edge on the right"
+   }
+  ],
+  "W6": [
+   {
+    "box": [
+     546,
+     1249,
+     611,
+     1302
+    ],
+    "why": "sweep pool right of the sharara hem"
+   },
+   {
+    "box": [
+     262,
+     1263,
+     324,
+     1306
+    ],
+    "why": "sweep pool left of the sharara hem"
+   }
+  ],
+  "M6": [
+   {
+    "box": [
+     322,
+     1272,
+     388,
+     1297
+    ],
+    "why": "sweep between the two sandals"
+   }
+  ],
+  "M13": [
+   {
+    "box": [
+     262,
+     1253,
+     329,
+     1311
+    ],
+    "why": "sweep patch beside the sneaker"
+   }
+  ]
+ }
+}

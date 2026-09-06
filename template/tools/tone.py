@@ -17,8 +17,12 @@ skin mask, and the number of changed pixels outside it must be zero.
 Usage:
   python3 template/tools/tone.py IN.jpg OUT.jpg --L 162 --S 40          # explicit targets
   python3 template/tools/tone.py IN.jpg OUT.jpg --tone light-tan        # from tone-ladder.json
-  python3 template/tools/tone.py IN.jpg OUT.jpg --tone fair --report     # print before/after numbers
+  python3 template/tools/tone.py template/base/M1-shirt-trousers.jpg OUT.png --tone as-shot --report
 Exit 1 if the edit leaked outside the skin mask or the result is off-target by more than 4 L / 4 S.
+
+`skin_mask` below is for an arbitrary photo. For the shop's 32 masters this CLI defers to
+`make_tones.tone_one`, so the single-frame command uses the same region the batch was certified on -
+otherwise a hand-run frame and a shipped frame drift, and the eye is the only thing that notices.
 """
 import argparse
 import json
@@ -107,27 +111,101 @@ def feather(m, sigma=0.8):
     return np.clip(ndimage.gaussian_filter(m.astype(float), sigma) * 1.0, 0, 1)
 
 
-def apply_tone(src, dst, Lt, St, report=False):
+def tone_pixels(X, m, Lt, St, w=None):
+    """Drive the skin in `m` to exactly (Lt, St), leaving hue and shading order intact.
+
+    L is the mean of the channels and S is max-min - the ladder's own units, so a frame
+    written here and a frame audited by audit.py agree by construction rather than by two
+    implementations drifting.
+
+    Lightness is moved with a GAMMA CURVE rather than an added offset, which is the
+    difference between a ladder and a broken one: three of thirty-two masters failed their
+    `fair` rung by 6-8 L when the shift was `L + dL`, because a +64 offset lands a bright
+    forehead on the 255 ceiling and clipping there is not recoverable, so the frame simply
+    arrived at 182 instead of 190. A curve that maps [0,255] onto [0,255] monotonically
+    cannot clip, and its exponent is then solved against the measured result - bisection
+    under the exact criterion, so "on target" is a measurement and not a promise.
+    Chroma is equalised by scaling each channel's offset from its own mean, which is what
+    keeps a person's warm/cool character across the whole ladder.
+    """
+    X = np.asarray(X, dtype=float)
+    L, S = rgb_to_ls(X)
+    if w is None:
+        w = feather(m)
+    mm = m if m.any() else np.ones_like(m, dtype=bool)
+    sL, sS = float(L[mm].mean()), float(S[mm].mean())
+
+    def build(gamma, gain):
+        Ln = 255.0 * np.clip(L / 255.0, 0.0, 1.0) ** gamma
+        Y = Ln[..., None] + (X - L[..., None]) * gain
+        Y = np.clip(Y, 0.0, 255.0)
+        return Y, float(Y.mean(2)[mm].mean()), float((Y.max(2) - Y.min(2))[mm].mean())
+
+    def solve_gamma(gain):
+        lo, hi = 0.02, 8.0                       # mean falls as gamma rises: monotone, bisect
+        for _ in range(26):
+            mid = 0.5 * (lo + hi)
+            _, aL, _ = build(mid, gain)
+            if aL > Lt:
+                lo = mid
+            else:
+                hi = mid
+        return 0.5 * (lo + hi)
+
+    gain = (St / max(sS, 1e-6)) if sS > 6 else 1.0
+    Y = aL = aS = None
+    for _ in range(3):                           # gamma and chroma gain interact; two rounds
+        g = solve_gamma(gain)                    # of correction converges well inside the
+        Y, aL, aS = build(g, gain)               # tolerance the single-frame tool uses
+        if abs(aS - St) <= 0.05 * max(1.0, St):
+            break
+        gain *= St / max(aS, 1e-6)
+    Y, aL, aS = build(g, gain)
+    Z = np.clip(X * (1 - w[..., None]) + Y * w[..., None], 0, 255).astype(np.uint8)
+    return Z, {"measured_L": sL, "measured_S": sS, "gain": gain, "gamma": g,
+               "dL": Lt - sL, "dS": St - sS, "landed_L": aL, "landed_S": aS}
+
+
+def outfit_for(src):
+    """The catalogue entry whose master is this file (matched on basename), else None."""
+    man = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "pieces.json")
+    if not os.path.exists(man):
+        return None
+    b = os.path.basename(src)
+    for o in json.load(open(man))["outfits"]:
+        if os.path.basename(o["image"]) == b:
+            return o
+    return None
+
+
+def apply_tone(src, dst, Lt, St, report=False, tone_name=""):
     im = Image.open(src).convert("RGB")
     X = np.asarray(im, dtype=float)
+    o = outfit_for(src)
+    if o is not None and tone_name:
+        from make_tones import tone_one
+        Z, m = tone_one(np.asarray(im, dtype=np.uint8), o, tone_name)
+        Z = Z.astype(float)
+        L, S = rgb_to_ls(X)
+        nL, nS = rgb_to_ls(Z)
+        aL, aS = float(nL[m].mean()), float(nS[m].mean())
+        moved = (np.abs(Z - X).max(2) > 2)
+        leak = int((moved & ~ndimage.binary_dilation(m, np.ones((3, 3)), iterations=2)).sum())
+        ok = (abs(aL - Lt) <= 4.0) and (abs(aS - St) <= 4.0) and leak == 0
+        if report or not ok:
+            print(f"  {o['id']} {tone_name} (catalogue region) skin px={int(m.sum()):7d} "
+                  f"L {L[m].mean():6.1f}->{aL:6.1f} (want {Lt:5.1f}) "
+                  f"S {S[m].mean():5.1f}->{aS:5.1f} (want {St:4.1f}) "
+                  f"leak={leak}px  {'PASS' if ok else 'FAIL'}")
+        Image.fromarray(Z.astype(np.uint8)).save(dst)
+        return 0 if ok else 1
     L, S = rgb_to_ls(X)
     m = skin_mask(X)
     if m.sum() < 8000:
         print(f"FAIL: skin cluster only {int(m.sum())} px -- refusing to guess")
         return 1
-    w = feather(m)
-    sL = float(L[m].mean())
-    sS = float(S[m].mean())
-    dL, dS = Lt - sL, St - sS
-    Y = X.copy()
-    # move luminance, then equalise chroma to the target, keeping hue (ratios of the channels' offsets)
-    for c in range(3):
-        off = X[..., c] - L
-        gain = (St / max(sS, 1e-6)) if sS > 6 else 1.0
-        Y[..., c] = Y[..., c] + dL + off * (gain - 1.0)
-    Y = np.clip(Y, 0, 255)
-    Z = X * (1 - w[..., None]) + Y * w[..., None]
-    Z = np.clip(Z, 0, 255).astype(np.uint8)
+    Z, st = tone_pixels(X, m, Lt, St)
+    sL, sS = st["measured_L"], st["measured_S"]
     Image.fromarray(Z).save(dst, quality=95, subsampling=0, optimize=False)
 
     nL, nS = rgb_to_ls(Z.astype(float))
@@ -156,11 +234,16 @@ def main():
     Lt, St = a.L, a.S
     if a.tone:
         lad = json.load(open(LADDER))["tones"][a.tone]
+        if lad.get("as_shot"):
+            # The shop serves the master itself as one complexion; nothing to edit, so copy.
+            Image.open(a.src).save(a.dst)
+            print(f"copied (as-shot rung): {a.dst}")
+            return 0
         Lt, St = lad["skinL"], lad["skinS"]
     if Lt is None or St is None:
         print("need --L/--S or a --tone present in tone-ladder.json")
         return 2
-    return apply_tone(a.src, a.dst, Lt, St, a.report)
+    return apply_tone(a.src, a.dst, Lt, St, a.report, a.tone)
 
 
 if __name__ == "__main__":
