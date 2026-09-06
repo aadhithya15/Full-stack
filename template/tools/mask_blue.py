@@ -59,7 +59,12 @@ HAIR_V = 46            # below this value = hair/shoes/void, never cloth
 # tone.py's skin_mask is the version that survived a whole catalogue of failures (light
 # warm shoes, bare legs under a hem, hair void, collar openings). Reusing it beats
 # re-deriving a warm-hue test here, which is what mislabeled 48% of a frame as skin.
-sys.path.insert(0, os.path.join(ROOT, "build-kit", "tools"))
+# the LIVE tools directory, not the archive. This pointed at build-kit/tools, which still
+# holds pre-reset copies of tone.py and bgmask.py, so every import silently resolved to the
+# archived file and an edit made to the live one changed nothing - the archived tone.py has
+# no tone_pixels at all, which is the only reason this surfaced instead of quietly shipping
+# the old transform.
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 try:
     from tone import skin_mask as _hardened_skin
 except Exception:                                       # pragma: no cover
@@ -333,6 +338,42 @@ def mask_for(rgb):
 
 
 # ---------------------------------------------------------------- tone variants
+def lab(rgb):
+    """sRGB -> CIE Lab (D65). Lives here so mask_code and the tone step share one
+    definition; PIL refuses RGB->Lab, and two implementations drifting apart is how a
+    classifier and a proof stop describing each other.
+    """
+    x = np.clip(np.asarray(rgb, dtype=float), 0, 255) / 255.0
+    x = np.where(x > 0.04045, ((x + 0.055) / 1.055) ** 2.4, x / 12.92)
+    m = np.array([[0.4124564, 0.3575761, 0.1804375],
+                  [0.2126729, 0.7151522, 0.0721750],
+                  [0.0193339, 0.1191920, 0.9503041]])
+    xyz = x @ m.T
+    xyz /= np.array([0.95047, 1.0, 1.08883])
+    e = np.where(xyz > 0.008856, np.cbrt(xyz), 7.787 * xyz + 16 / 116)
+    L = 116.0 * e[..., 1] - 16.0
+    A = 500.0 * (e[..., 0] - e[..., 1])
+    B = 200.0 * (e[..., 1] - e[..., 2])
+    return np.stack([L, A, B], -1)
+
+
+def from_lab(lab_img):
+    """CIE Lab (D65) -> sRGB, the exact inverse of lab(), clipped into gamut."""
+    e = np.asarray(lab_img, dtype=float)
+    fy = (e[..., 0] + 16.0) / 116.0
+    fx = e[..., 1] / 500.0 + fy
+    fz = fy - e[..., 2] / 200.0
+    f = np.stack([fx, fy, fz], -1)
+    xyz = np.where(f > 0.206893, f ** 3, (f - 16 / 116) / 7.787)
+    xyz *= np.array([0.95047, 1.0, 1.08883])
+    m = np.array([[3.2404542, -1.5371385, -0.4985314],
+                  [-0.9692660, 1.8760108, 0.0415560],
+                  [0.0556434, -0.2040259, 1.0572252]])
+    rgb = xyz @ m.T
+    rgb = np.where(rgb > 0.0031308, 1.055 * np.clip(rgb, 0, None) ** (1 / 2.4) - 0.055, 12.92 * rgb)
+    return np.clip(rgb * 255.0, 0, 255).astype(np.uint8)
+
+
 def skin_band(rgb, avoid=None):
     """The real skin of the frame, found geometrically, with no assumption that the
     backdrop is neutral.
@@ -367,37 +408,281 @@ def skin_band(rgb, avoid=None):
     return m
 
 
-def tone_variant(rgb, L, S, avoid=None):
-    """Re-tone only the pixels in skin_band(), and assert nothing else moved. Used by
-    the proof to build the other five complexions of a master."""
-    rgb = np.asarray(rgb, dtype=np.uint8)
-    m = skin_band(rgb, avoid)
-    if m.sum() < 4000:
-        raise RuntimeError(f"skin band only {int(m.sum())} px - refusing to re-tone")
-    if m.sum() / m.size > 0.30:
-        raise RuntimeError(f"skin band is {m.sum()/m.size*100:.1f}% of frame - it is eating cloth")
-    hsv = np.asarray(Image.fromarray(rgb).convert("HSV"), dtype=float)
-    cur_v, cur_s = hsv[..., 2][m].mean(), hsv[..., 1][m].mean()
-    out = hsv.copy()
-    out[..., 2] = np.clip(out[..., 2] + (L - cur_v), 0, 255)
-    out[..., 1] = np.clip(out[..., 1] + (S - cur_s), 0, 255)
-    shifted = np.asarray(Image.fromarray(out.astype(np.uint8)).convert("RGB"), dtype=float)
-    w = np.clip(ndimage.gaussian_filter(m.astype(float), 0.8), 0, 1)
-    # Hard-stop the feather at the garment. The gaussian exists so a skin edge does not
-    # look like a staircase, but it bleeds a few cloth pixels into the blend, and those
-    # pixels then disagree with the shipped mask. A piece owns its pixels outright, so on
-    # the tone images cloth is bit-identical to the base by construction.
+def skin_weight(rgb, avoid=None):
+    """How much of the tone shift each pixel gets.
+
+    Two borders have to be respected and neither is handled by a plain gaussian: inside the
+    garment a piece mask owns its pixels outright, so a feather must not touch cloth (that
+    leak made the shipped masks disagree with the tone frames); outside, the seamless sweep
+    must stay bit-identical between complexions, or the backdrop itself changes with skin
+    tone and every backdrop-relative measure goes stale.
+
+    So: feather where it helps (a 0.8px gaussian over the skin band), then hard-restrict it
+    to the skin plus a single-pixel ring, which is all that anti-aliased edge there is. A
+    ratio-of-chroma weight was tried first and is wrong - this sweep is warm and its chroma
+    rises toward the floor, so 4x the skin area got a nonzero weight and the top margin moved
+    by 23 levels.
+    """
+    X = np.asarray(rgb, dtype=float)
+    m = skin_band(np.clip(X, 0, 255).astype(np.uint8), avoid)
+    w = np.clip(ndimage.gaussian_filter(m.astype(float), 0.8), 0.0, 1.0)
+    near = ndimage.binary_dilation(m, np.ones((3, 3)))
+    w = np.where(near, w, 0.0)
     if avoid is not None:
         w = np.where(np.asarray(avoid) > 127, 0.0, w)
-    blended = np.clip(shifted * w[..., None] + rgb.astype(float) * (1 - w[..., None]), 0, 255).astype(np.uint8)
-    moved = np.abs(blended.astype(float) - rgb.astype(float)).max(2)[w <= 0.001] >= 2
-    if moved.sum():
-        raise RuntimeError(f"leaked to {int(moved.sum())} px outside the skin band")
-    return blended
+    return w, m
 
 
-LADDER = {"fair": (190, 24), "light-warm": (178, 30), "light-tan": (164, 35),
-          "medium-brown": (148, 38), "deep": (130, 41), "ebony": (114, 44)}
+def head_box(rgb):
+    g = np.asarray(Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("L"), dtype=float)
+    h, w = g.shape
+    b = max(4, h // 40)
+    strip = np.concatenate([g[:b].ravel(), g[-b:].ravel(), g[:, :b].ravel(), g[:, -b:].ravel()], 0)
+    obj = np.abs(g - float(np.median(strip))) > 16
+    obj = ndimage.binary_fill_holes(ndimage.binary_opening(obj, np.ones((5, 5))))
+    wid = obj.sum(1)
+    min_head = max(24, w * 0.06)
+    rows = np.nonzero(wid >= min_head)[0]
+    if not len(rows):
+        return None
+    top = int(rows[0])
+    if top > h * 0.22:
+        return None
+    chin = min(h - 1, top + int(h * 0.115))
+    for y in range(top + 6, min(h, top + int(h * 0.30))):
+        xs = np.nonzero(obj[y])[0]
+        if len(xs) and (xs[-1] - xs[0] + 1) > 1.62 * min_head:
+            chin = max(y - 6, top + int(h * 0.05))
+            break
+    if chin - top < h * 0.045:
+        return None
+    xs = np.nonzero(obj[top:chin].any(0))[0]
+    cx = int((xs[0] + xs[-1]) / 2) if len(xs) else w // 2
+    hw = max(int((xs[-1] - xs[0] + 1) / 2), 1) if len(xs) else int(min_head)
+    yy, xx = np.mgrid[0:h, 0:w]
+    return (((yy - (top + chin) / 2) / max(2.0, (chin - top) / 2 * 1.35)) ** 2
+            + ((xx - cx) / max(2.0, hw * 1.15)) ** 2) <= 1.0
+
+
+def backdrop_like(rgb):
+    """Pixels that cannot be skin because they are not in skin's colour family.
+
+    The studio sweep is cool grey (blue channel the highest of the three) at low chroma; skin
+    is warm (red clearly above blue) at real chroma. Testing colour family rather than
+    luminance is what makes this usable as a guard: an earlier version compared skin to the
+    backdrop by brightness and so classified every lit forearm as backdrop, and a geometric
+    "is it inside the figure's span" version had to be abandoned because the sweep's own
+    gradient makes nearly every row span the full width (measured: 98.6% of the frame).
+    """
+    X = np.asarray(rgb, dtype=float)
+    R, G, B = X[..., 0], X[..., 1], X[..., 2]
+    chroma = X.max(2) - X.min(2)
+    w = X.shape[1]
+    b = max(4, min(28, w // 26))
+    side = np.concatenate([X[:, :b], X[:, -b:]], 1)
+    bgC = np.median(side.max(2) - side.min(2), 1)
+    cool_or_neutral = B >= R - 2.0
+    flat = chroma <= bgC[:, None] + 6.0
+    return cool_or_neutral | flat
+
+
+def skin_region(rgb, avoid=None):
+    """EVERY skin pixel of the frame, bright limbs included - what the tone step needs.
+
+    skin_band() above is a conservative detector and that is right for a gate, where a
+    subset is safe; it is wrong for re-toning, because it asks skin to be darker than the
+    backdrop, and a lit forearm or a light complexion is not. That produced two visible
+    defects no metric complained about: a model's bare legs kept their base tan while her
+    face went fair, and a soft shadow in the top-left of the sweep had enough chroma to
+    qualify as skin and got tinted, leaving a grey smudge on five of six cards.
+
+    So the backdrop is modelled where it actually is - per row, from the two side strips -
+    and skin is whatever sits inside the figure, is warmer/more chromatic than the sweep at
+    that height, is not a coded garment and is not the hair mass. Luminance is deliberately
+    not a criterion, which is the whole point: it is what made bright skin invisible.
+    """
+    X = np.asarray(rgb, dtype=float)
+    h, w = X.shape[:2]
+    b = max(4, min(28, w // 26))
+    side = np.concatenate([X[:, :b], X[:, -b:]], 1)                    # (h, 2b, 3)
+    bgL = np.median(side, (1, 2))                                       # per-row sweep level
+    bgC = np.median(side.max(2) - side.min(2), 1)
+    lum = X.mean(2)
+    chroma = X.max(2) - X.min(2)
+    mx, mn = X.max(2), X.min(2)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        dd = np.where(mx > mn, mx - mn, np.nan)
+        hue = 60.0 * np.where(mx == X[..., 0], ((X[..., 1] - X[..., 2]) / dd) % 6.0,
+                     np.where(mx == X[..., 1], (X[..., 2] - X[..., 0]) / dd + 2.0,
+                                            (X[..., 0] - X[..., 1]) / dd + 4.0))
+    hue = np.nan_to_num(hue, nan=-999.0)
+    m = ((chroma > bgC[:, None] + 18.0) & (X[..., 0] > X[..., 2] + 8.0)
+         & (lum > 40.0) & (lum < 250.0))
+    if avoid is not None:
+        m &= ~ndimage.binary_dilation(np.asarray(avoid) > 127, np.ones((5, 5)))
+    m = ndimage.binary_opening(m, np.ones((3, 3)))
+    m = ndimage.binary_closing(m, np.ones((7, 7)))
+    lab, n = ndimage.label(m, np.ones((3, 3)))
+    if n > 1:
+        sz = np.bincount(lab.ravel(), minlength=n + 1)
+        big = max(1200, int(0.0004 * m.size))
+        keep = [i for i in range(1, n + 1) if sz[i] >= big]
+        m = np.isin(lab, keep) if keep else m & False
+    # hair is dark and near-achromatic, and it sits on top of the head; shoes are dark and
+    # below the figure. Neither is skin, neither may be re-toned.
+    dark_ach = (lum < 62) & (chroma < 46)
+    hb = head_box(X)
+    if hb is not None and dark_ach.any():
+        lh, nh = ndimage.label(dark_ach, np.ones((3, 3)))
+        sd = set(np.unique(lh[hb & (lh > 0)]).tolist()) - {0}
+        if sd:
+            m &= ~np.isin(lh, list(sd))
+    # ...and any pixel far darker than the region's own median skin level, which catches the
+    # hair a head-box test misses: a plait down the back or hair over a shoulder is skin-dark
+    # but not skin, and was being tanned along with the face (measured median L 20-49 sitting
+    # inside the region on six frames). Luminance is banned as a skin *inclusion* test because
+    # it hides bright limbs; as an *exclusion* floor relative to this frame's own skin it is
+    # exactly the right tool, and it scales with the model rather than with a fixed threshold.
+    if m.any():
+        m &= lum >= 0.42 * float(np.median(lum[m]))
+    # Hue is the criterion `R > B` cannot be: magenta, rose and a pink bounce off a gown are all
+    # "warmer than blue" and so were being tanned - a satin hem sliver in W8 and W11, and the
+    # sweep's contact shadow under a hem in W1, W2, W6, W7, W9 and W14. Skin's hue is measured on
+    # the one place it cannot be confused with anything, the head, and a +-45 deg window is asked
+    # of the rest of the body. The lightness/saturation envelope is relative to the same frame's
+    # own skin for the same reason - an absolute brightness test is what hid W12's legs earlier.
+    hb = head_box(X)
+    anch = m if hb is None else (m & hb)
+    hue_ref = float(np.median(hue[anch])) if anch.sum() >= 400 else 25.0
+    dh = np.abs(((hue - hue_ref + 180.0) % 360.0) - 180.0)
+    m &= dh <= 45.0
+    if m.any():
+        m = ndimage.binary_opening(m, np.ones((3, 3)))
+    m[:int(0.02 * h)] = False                 # nothing at the very top edge is skin
+    return m
+
+
+_EXCL = None
+
+
+def exclusions(shape, oid):
+    """Curated boxes this outfit's tone step must never touch, as a boolean mask.
+
+    tone-exclusions.json holds them: pale footwear whose colour really is inside skin's envelope,
+    and patches of sweep that a gown's bounce light makes warm under a hem. A general detector
+    could not separate either from a bare leg without cutting the leg too, which is what the
+    geometric rule in the git history tried and did. The masters are fixed-pose renders, so for
+    a catalogue of 32 known frames a checked box is the exact instrument.
+
+    Only ever removes pixels from the tone region; make_tones.py gate T5 proves nothing inside one
+    changed.
+    """
+    global _EXCL
+    if _EXCL is None:
+        _EXCL = {}
+        if os.path.exists(EXCL_PATH):
+            with open(EXCL_PATH) as fh:
+                _EXCL = json.load(fh).get("exclusions", {})
+    m = np.zeros(tuple(shape[:2]), bool)
+    for e in _EXCL.get(oid, []):
+        x0, y0, x1, y1 = e["box"]
+        m[max(0, y0):y1 + 1, max(0, x0):x1 + 1] = True
+    return m
+
+
+# A geometric "limb continuity" rule was tried here and removed on sight: grown from the garment's
+# hem it cut W12's and W10's shaded leg while leaving the other one toned, and it stopped neither
+# the nude pumps nor the floor smear it was written for. What remains below is instead a small
+# curated table, tone-exclusions.json, reviewed frame by frame - see make_tones.py.
+
+
+def tone_variant(rgb, L, S, avoid=None, return_stats=False):
+    """Re-tone skin only, weighted by skin fraction, and assert nothing else moved.
+
+    L and S are the ladder's targets in the ladder's own units - mean of channels and
+    max-min, exactly what tone.py's rgb_to_ls measures and what audit.py gates. Two other
+    spaces were tried first and both were wrong: PIL-HSV saturation put the base at 193
+    against a target of 35, and Lab was worse, because L* stops at 100 while the ladder runs
+    114-190. So the colour maths lives in tone.tone_pixels, the region lives in
+    skin_region above, and this function owns only the guard - used by the mask proof and by
+    make_tones.py alike, so what is certified is what ships.
+    """
+    rgb = np.asarray(rgb, dtype=np.uint8)
+    m = skin_region(rgb.astype(float), avoid)
+    if m.sum() < 6000:
+        raise RuntimeError(f"skin region only {int(m.sum())} px - refusing to re-tone")
+    if m.sum() / m.size > 0.55:
+        raise RuntimeError(f"skin region is {m.sum() / m.size * 100:.1f}% of frame - it is eating the sweep")
+    w = np.clip(ndimage.gaussian_filter(m.astype(float), 0.8), 0.0, 1.0)
+    w = np.where(ndimage.binary_dilation(m, np.ones((3, 3))), w, 0.0)
+    if avoid is not None:
+        w = np.where(np.asarray(avoid) > 127, 0.0, w)
+    from tone import tone_pixels
+    blended, st = tone_pixels(rgb.astype(float), m, float(L), float(S), w=w)
+    # Anything the piece masks own, and every pixel in the frame's outer strips (which is by
+    # construction sweep, never skin), must be untouched to the last bit. The strip check is
+    # independent of the skin detector on purpose: when "outside skin" was defined using the
+    # same mask being tested, a tinted patch of backdrop shadow counted as skin and passed.
+    d = np.abs(blended.astype(float) - rgb.astype(float)).max(2)
+    bad = []
+    if avoid is not None:
+        n_c = int((d >= 1)[np.asarray(avoid) > 127].sum())
+        if n_c:
+            bad.append(f"{n_c}px of owned cloth changed")
+    # A soft edge is not a leak: the blend feather covers one pixel of ambiguous anti-aliasing
+    # on either side of the region, and those pixels are legitimately half skin. Only backdrop
+    # that sits clear of the region is a violation.
+    near = ndimage.binary_dilation(m, np.ones((5, 5)))
+    n_s = int((d >= 1)[backdrop_like(rgb.astype(float)) & ~near].sum())
+    if n_s:
+        bad.append(f"{n_s}px of backdrop (cool-grey / flat sweep) changed clear of the skin")
+    if bad:
+        raise RuntimeError("tone leaked: " + ", ".join(bad))
+    return (blended, st) if return_stats else blended
+
+
+# The ladder is a file, not a constant, so the batch generator, this harness and `tone.py`'s own
+# CLI cannot drift apart - they were duplicates of the same six pairs until now. Units are
+# tone.py's: skinL = mean of the three channels, skinS = highest minus lowest, both 0-255.
+LADDER_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tone-ladder.json")
+EXCL_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "tone-exclusions.json")
+_LAD_CACHE = {}
+_LAD_NAMES = ("LADDER", "COPY_TONES", "ORDER", "SKIN_S_BAND", "NEIGH_MIN_GAP", "AUDIT_TOL_L")
+
+
+def _ladder():
+    """The complexion contract, read once, from one file - and only when something needs it.
+
+    This used to run at import time, which meant mask_blue could not be imported by a tree that has the
+    masking tools but not the tone config - the framing audit and mask re-derivation both died on a
+    FileNotFoundError before they could say anything. Lazy is the correct direction of dependency here:
+    masking never needs the ladder, so masking must not be able to fail because of it. When a tone tool
+    does want it and the file is genuinely missing, the error is explicit about that.
+    """
+    if not _LAD_CACHE:
+        if not os.path.exists(LADDER_PATH):
+            raise FileNotFoundError(
+                f"{LADDER_PATH} is missing. It is the single definition of the six complexions "
+                "(targets, gate, which rung is copied); copy it in from the tone batch instead of "
+                "restating the numbers here.")
+        with open(LADDER_PATH) as fh:
+            lad = json.load(fh)
+        _LAD_CACHE.update({
+            "LADDER": {k: (float(v["skinL"]), float(v["skinS"])) for k, v in lad["tones"].items()},
+            # rungs the shop wants served as the master itself: still their own folder, nothing edited
+            "COPY_TONES": {k for k, v in lad["tones"].items() if v.get("as_shot")},
+            "ORDER": sorted(lad["tones"], key=lambda k: lad["tones"][k]["rank"]),
+            "SKIN_S_BAND": (float(lad["gate"]["skinS_min"]), float(lad["gate"]["skinS_max"])),
+            "NEIGH_MIN_GAP": float(lad["gate"]["neighbour_min_gap"]),
+            "AUDIT_TOL_L": float(lad["gate"]["tolerance_L"]),
+        })
+    return _LAD_CACHE
+
+
+def __getattr__(name):
+    if name in _LAD_NAMES:
+        return _ladder()[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def main():

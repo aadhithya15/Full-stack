@@ -48,6 +48,21 @@ def load(oid, man):
     return o, rgb, masks
 
 
+def paint(rgb, masks):
+    """The master with every piece mask painted over it - the customer-facing proof of the masks.
+
+    Kept as one function because the overlay sheet and the per-piece proof sheet used to tint slightly
+    differently, which made the two disagree about nothing in particular and cost an hour.
+    """
+    a = rgb.astype(np.uint8).copy()
+    for nm, code, m in masks:
+        if not m.any():
+            continue
+        a[m] = (a[m] * 0.5 + np.array(TINT.get(code, TINT["rose"])) * 0.5).astype(np.uint8)
+        a[m & ~ndimage.binary_erosion(m, np.ones((3, 3)))] = EDGE.get(code, EDGE["rose"])
+    return a
+
+
 def build(ids, out, scale=0.30):
     man = json.load(open(os.path.join(ROOT, "template", "pieces.json")))
     F, Fs = font(15, True), font(13)
@@ -67,13 +82,7 @@ def build(ids, out, scale=0.30):
             ImageDraw.Draw(im).text((6, 4), f"{nm} {int(m.sum()) // 1000}k", font=Fs,
                                     fill=(235, 235, 235))
             cells.append(im)
-        a = rgb.astype(np.uint8).copy()                 # master + boundaries
-        for nm, code, m in masks:
-            if not m.any():
-                continue
-            a[m] = (a[m] * 0.5 + np.array(TINT.get(code, TINT["rose"])) * 0.5).astype(np.uint8)
-            a[m & ~ndimage.binary_erosion(m, np.ones((3, 3)))] = EDGE.get(code, EDGE["rose"])
-        im = Image.fromarray(a)
+        im = Image.fromarray(paint(rgb, masks))         # master + boundaries
         ImageDraw.Draw(im).text((6, 4), f"{oid}  {o['slug']}", font=F, fill=(255, 255, 255))
         rows.append([im] + cells)
     ncol = max(len(r) for r in rows)
@@ -91,12 +100,41 @@ def build(ids, out, scale=0.30):
     return sheet.size
 
 
+def grid(ids, out, scale=0.30, ncol=8):
+    """All outfits as one cell each, masks painted over - `_qc/all32-overlay.png`, the grid you scan
+    in one screen. Same paint() as the per-piece proof, so the two cannot drift apart."""
+    man = json.load(open(os.path.join(ROOT, "template", "pieces.json")))
+    F, = (font(15, True),)
+    cw, ch = int(768 * scale), int(1376 * scale)
+    pad, lab = 8, 20
+    cells = []
+    for oid in ids:
+        o, rgb, masks = load(oid, man)
+        im = Image.fromarray(paint(rgb, masks))
+        ImageDraw.Draw(im).text((6, 4), oid, font=F, fill=(255, 255, 255))
+        cells.append(im.resize((cw, ch), Image.LANCZOS))
+    nrow = (len(cells) + ncol - 1) // ncol
+    sheet = Image.new("RGB", (ncol * (cw + pad) + pad, nrow * (ch + lab + pad) + 24), (10, 10, 12))
+    d = ImageDraw.Draw(sheet)
+    d.text((pad, 5), f"{len(cells)} masters with their piece masks painted over", font=font(14, True),
+           fill=(235, 235, 240))
+    for i, im in enumerate(cells):
+        r, c = divmod(i, ncol)
+        sheet.paste(im, (pad + c * (cw + pad), 24 + lab + r * (ch + lab + pad)))
+        d.text((pad + c * (cw + pad) + 2, 24 + r * (ch + lab + pad)), ids[i], font=font(12),
+               fill=(235, 235, 240))
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    sheet.save(out)
+    return sheet.size
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--ids", default="")
     ap.add_argument("--out", default=os.path.join(ROOT, "template", "_qc", "masks-proof.png"))
     ap.add_argument("--scale", type=float, default=0.30,
                     help="cell width as a fraction of 768; raise it to inspect one batch")
+    ap.add_argument("--grid", type=int, default=0, help="one cell per outfit, N columns (the all32 overlay)")
     a = ap.parse_args()
     if a.ids:
         ids = a.ids.split(",")
@@ -107,6 +145,9 @@ def main():
     if not ids:
         print("nothing masked yet", file=sys.stderr)
         return 1
+    if a.grid:
+        print("grid", grid(ids, a.out, scale=a.scale, ncol=a.grid), "->", os.path.relpath(a.out, ROOT))
+        return 0
     print("sheet", build(ids, a.out, scale=a.scale), "->", os.path.relpath(a.out, ROOT))
     if a.scale != 0.30:
         print("sheet only: skipping the full re-run")

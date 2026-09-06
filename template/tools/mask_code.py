@@ -115,26 +115,7 @@ def fit_master(im, W=768, H=1376):
     return im.crop(box).resize((W, H), Image.LANCZOS)
 
 
-def lab(rgb):
-    """sRGB -> CIE Lab (D65), computed here because PIL refuses RGB->Lab.
-
-    Lab, not RGB or HSV, is the right space for this: it is roughly perceptually
-    uniform, so a fixed distance threshold means a fixed *visible* difference. That
-    is what makes a single cap (52) work for a bright rose jacket and a shadowed
-    green trouser at the same time, which hue-only or RGB-only thresholds cannot.
-    """
-    x = np.clip(np.asarray(rgb, dtype=float), 0, 255) / 255.0
-    x = np.where(x > 0.04045, ((x + 0.055) / 1.055) ** 2.4, x / 12.92)
-    m = np.array([[0.4124564, 0.3575761, 0.1804375],
-                  [0.2126729, 0.7151522, 0.0721750],
-                  [0.0193339, 0.1191920, 0.9503041]])
-    xyz = x @ m.T
-    xyz /= np.array([0.95047, 1.0, 1.08883])
-    e = np.where(xyz > 0.008856, np.cbrt(xyz), 7.787 * xyz + 16 / 116)
-    L = 116.0 * e[..., 1] - 16.0
-    A = 500.0 * (e[..., 0] - e[..., 1])
-    B = 200.0 * (e[..., 1] - e[..., 2])
-    return np.stack([L, A, B], -1)
+from mask_blue import lab, head_box   # one Lab implementation and one head locator, shared with the tone step
 
 
 def classify(rgb, codes):
@@ -284,37 +265,6 @@ def roles_for(o):
         for nm in vis[1:-1]:
             out[nm] = "blue"
     return out
-
-
-def head_box(rgb):
-    g = np.asarray(Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8)).convert("L"), dtype=float)
-    h, w = g.shape
-    b = max(4, h // 40)
-    strip = np.concatenate([g[:b].ravel(), g[-b:].ravel(), g[:, :b].ravel(), g[:, -b:].ravel()], 0)
-    obj = np.abs(g - float(np.median(strip))) > 16
-    obj = ndimage.binary_fill_holes(ndimage.binary_opening(obj, np.ones((5, 5))))
-    wid = obj.sum(1)
-    min_head = max(24, w * 0.06)
-    rows = np.nonzero(wid >= min_head)[0]
-    if not len(rows):
-        return None
-    top = int(rows[0])
-    if top > h * 0.22:
-        return None
-    chin = min(h - 1, top + int(h * 0.115))
-    for y in range(top + 6, min(h, top + int(h * 0.30))):
-        xs = np.nonzero(obj[y])[0]
-        if len(xs) and (xs[-1] - xs[0] + 1) > 1.62 * min_head:
-            chin = max(y - 6, top + int(h * 0.05))
-            break
-    if chin - top < h * 0.045:
-        return None
-    xs = np.nonzero(obj[top:chin].any(0))[0]
-    cx = int((xs[0] + xs[-1]) / 2) if len(xs) else w // 2
-    hw = max(int((xs[-1] - xs[0] + 1) / 2), 1) if len(xs) else int(min_head)
-    yy, xx = np.mgrid[0:h, 0:w]
-    return (((yy - (top + chin) / 2) / max(2.0, (chin - top) / 2 * 1.35)) ** 2
-            + ((xx - cx) / max(2.0, hw * 1.15)) ** 2) <= 1.0
 
 
 def mask_set(rgb, o, proof=False):
