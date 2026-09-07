@@ -50,14 +50,14 @@ _upload_lock = threading.Lock()
 
 _HEX_RE = re.compile(r"^[0-9A-F]{6}$")
 
-# Public/API labels remain stable while the latest template set stores six
-# calibrated native depth variants. An undertone-only request has no reliable
-# depth, so warm uses the warm-light native and cool uses the safe middle depth.
+# Six public depth labels map one-to-one onto the six committed native
+# complexion folders, ordered light to dark. Undertone-only requests do not
+# contain reliable depth, so warm uses light-warm and cool uses medium-brown.
 PUBLIC_TO_NATIVE_TONE = {
-    "fair": "fair",
-    "light": "light-warm",
-    "wheatish": "light-tan",
-    "medium": "medium-brown",
+    "fair": "light-warm",
+    "light": "light-tan",
+    "wheatish": "medium-brown",
+    "medium": "as-shot",
     "dusky": "deep",
     "deep": "ebony",
     "warm": "light-warm",

@@ -1,3 +1,3 @@
-# One-time offline template preparation and QA dependency.
+# Verification-only dependency for committed template assets.
 # Production runtime does not import scipy.
 scipy>=1.11,<2

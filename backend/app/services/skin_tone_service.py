@@ -1,8 +1,9 @@
 """Skin-tone detection and canonical template-tone selection.
 
 Detection uses Gemini Vision first and a local Pillow fallback second.
-Template selection uses canonical_tone() to map free text to one of the
-8 skin-tone folders supplied by the design team.
+Template selection uses canonical_tone() to map free text to one of eight
+public labels. The template service maps those labels onto the six approved
+native complexion folders supplied by the design team.
 
 Public functions:
     detect_skin_tone(image_bytes, mime) -> descriptive label

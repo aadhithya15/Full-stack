@@ -882,8 +882,17 @@
     }
   ],
   "_backend_local_demo": {
-    "github_main_commit": "d7d2ade67432d064aa8dc0d291e80cb9e2434794",
-    "m4_necktie_pixels_removed": 4212,
-    "skin_tones": "base only"
+    "github_main_commit": "674e0fc5f20b01476bfeaf6a60e58ea11451f72f",
+    "m4_necktie_pixels_removed": 1912,
+    "skin_tones": [
+      "as-shot",
+      "light-warm",
+      "light-tan",
+      "medium-brown",
+      "deep",
+      "ebony"
+    ],
+    "tone_images": 192,
+    "tone_assets_generated_by_backend": 0
   }
 }

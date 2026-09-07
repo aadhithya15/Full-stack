@@ -141,10 +141,10 @@ def test_render_cache_is_separate_for_each_skin_tone():
 @pytest.mark.parametrize(
     ("public_tone", "native_tone"),
     [
-        ("fair", "fair"),
-        ("light", "light-warm"),
-        ("wheatish", "light-tan"),
-        ("medium", "medium-brown"),
+        ("fair", "light-warm"),
+        ("light", "light-tan"),
+        ("wheatish", "medium-brown"),
+        ("medium", "as-shot"),
         ("dusky", "deep"),
         ("deep", "ebony"),
         ("warm", "light-warm"),
@@ -154,11 +154,24 @@ def test_render_cache_is_separate_for_each_skin_tone():
 def test_public_tone_aliases_select_latest_native_variant(public_tone, native_tone):
     variants = {
         tone: f"https://x/{tone}.jpg"
-        for tone in {"fair", "light-warm", "light-tan", "medium-brown", "deep", "ebony"}
+        for tone in {"as-shot", "light-warm", "light-tan", "medium-brown", "deep", "ebony"}
     }
     assert template_service._variant_tone_key(
         _row(tone_variants=variants), public_tone
     ) == native_tone
+
+
+def test_six_public_depth_labels_cover_all_six_native_variants_once():
+    public_depths = ("fair", "light", "wheatish", "medium", "dusky", "deep")
+    native = {template_service.PUBLIC_TO_NATIVE_TONE[tone] for tone in public_depths}
+    assert native == {
+        "light-warm",
+        "light-tan",
+        "medium-brown",
+        "as-shot",
+        "deep",
+        "ebony",
+    }
 
 
 def test_valid_exact_mask_set_passes_through_pixel_for_pixel():
