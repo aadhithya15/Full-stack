@@ -1,0 +1,19 @@
+﻿# Dependencies
+node_modules/
+**/node_modules/
+.venv/
+venv/
+__pycache__/
+# Secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+# Build output and logs
+dist/
+build/
+.next/
+out/
+coverage/
+*.log

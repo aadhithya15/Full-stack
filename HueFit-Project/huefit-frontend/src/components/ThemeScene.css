@@ -1,0 +1,97 @@
+.theme-scene {
+  position: relative;
+  height: 100%;
+  min-height: 220px;
+  overflow: hidden;
+  perspective: 900px;
+}
+.theme-scene.is-compact { min-height: 160px; }
+.mixed-scene {
+  background:
+    radial-gradient(circle at 30% 28%, rgba(224,177,90,.35), transparent 42%),
+    radial-gradient(circle at 78% 72%, rgba(122,160,255,.22), transparent 46%),
+    linear-gradient(160deg, #2a161c, #171d2b 58%, #1c1418);
+}
+.scene-stage {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  transform-style: preserve-3d;
+}
+.scene-caption {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  z-index: 2;
+  margin: 0;
+  font: 500 9px/1 'DM Mono', monospace;
+  letter-spacing: 1.3px;
+  text-transform: uppercase;
+  color: #fff4e0;
+}
+.is-compact .scene-caption { display: none; }
+
+.mix-glow {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(224,177,90,.45), transparent 68%);
+  filter: blur(6px);
+  animation: mixPulse 4.5s ease-in-out infinite;
+}
+.mix-ring {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  transform: rotateX(66deg);
+}
+.mix-ring-gold {
+  border: 12px solid #e0b15a;
+  border-left-color: transparent;
+  animation: mixSpin 14s linear infinite;
+}
+.mix-ring-steel {
+  width: 110px;
+  height: 110px;
+  border: 8px solid #c5d0e8;
+  border-right-color: transparent;
+  animation: mixSpin 10s linear infinite reverse;
+}
+.mix-silk {
+  position: absolute;
+  width: 58%;
+  height: 16px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #7a2431, #e0b15a, #f6e2b8);
+  transform: rotate(-26deg);
+  box-shadow: 0 10px 18px rgba(0,0,0,.28);
+  animation: mixSway 5s ease-in-out infinite;
+}
+.mix-glass {
+  position: absolute;
+  width: 78px;
+  height: 52px;
+  right: 18%;
+  top: 22%;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.05));
+  border: 1px solid rgba(255,255,255,.32);
+  transform: rotateX(58deg) rotateZ(-16deg);
+  animation: mixGlass 6s ease-in-out infinite;
+}
+
+.is-compact .mix-ring { width: 108px; height: 108px; }
+.is-compact .mix-ring-steel { width: 78px; height: 78px; }
+.is-compact .mix-glass { width: 56px; height: 38px; }
+
+@keyframes mixSpin { to { transform: rotateX(66deg) rotateZ(360deg); } }
+@keyframes mixPulse { 50% { transform: scale(1.12); opacity: .7; } }
+@keyframes mixSway { 50% { transform: rotate(-14deg) translateX(8px); } }
+@keyframes mixGlass { 50% { transform: rotateX(58deg) rotateZ(-6deg) translateY(-8px); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .mix-glow, .mix-ring, .mix-silk, .mix-glass { animation: none; }
+}
