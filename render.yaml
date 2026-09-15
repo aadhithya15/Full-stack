@@ -1,0 +1,56 @@
+# Render Blueprint — HueFit: BOTH frontend and backend on Render.
+# Place this file at the ROOT of the repository (next to backend/ and huefit-frontend/).
+# Deploy: Render Dashboard → New → Blueprint → select this repo → fill in secrets → Apply.
+
+services:
+  # ─────────────────────────────────────────────────────────────
+  # Backend: Flask API (web service)
+  # ─────────────────────────────────────────────────────────────
+  - type: web
+    name: huefit-backend
+    runtime: python
+    rootDir: backend
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn "app:create_app()" -b 0.0.0.0:$PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.6"
+      - key: FLASK_ENV
+        value: production
+      # Secrets — Render prompts for these during blueprint creation.
+      - key: ALLOWED_ORIGINS
+        sync: false          # e.g. https://huefit-frontend.onrender.com
+      - key: SUPABASE_URL
+        sync: false          # Supabase → Settings → API → Project URL
+      - key: SUPABASE_SERVICE_KEY
+        sync: false          # Supabase → Settings → API → service_role key
+      - key: SUPABASE_JWT_SECRET
+        sync: false          # Supabase → Settings → API → JWT Secret
+      # Optional — the app falls back to a built-in mock stylist without them.
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+
+  # ─────────────────────────────────────────────────────────────
+  # Frontend: React + Vite (static site — free, never sleeps)
+  # ─────────────────────────────────────────────────────────────
+  - type: web
+    name: huefit-frontend
+    runtime: static
+    rootDir: huefit-frontend
+    buildCommand: npm ci --include=dev && npm run build
+    outputDir: dist
+    routes:
+      # SPA fallback: unknown paths serve index.html so React Router
+      # handles them. Real files (assets, favicon) are served first.
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: VITE_API_BASE_URL
+        sync: false          # e.g. https://huefit-backend.onrender.com/api
