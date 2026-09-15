@@ -42,7 +42,7 @@ services:
     runtime: static
     rootDir: huefit-frontend
     buildCommand: npm ci --include=dev && npm run build
-    outputDir: dist
+    staticPublishPath: ./dist
     routes:
       # SPA fallback: unknown paths serve index.html so React Router
       # handles them. Real files (assets, favicon) are served first.
