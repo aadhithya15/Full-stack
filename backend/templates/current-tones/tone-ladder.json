@@ -1,0 +1,75 @@
+{
+ "_comment": "Six complexions the shop offers, ordered light to dark: five re-toned and one that is the master as shot. Deliberately NOT strong - the audience is Tamil Nadu, so the ladder stays warm-neutral and lightly saturated instead of running to a deep golden/ebony contrast. skinL/skinS are exact targets measured on the frame's skin region in tone.py's units (skinL = mean of channels, skinS = highest minus lowest, 0-255). The five driven rungs share one saturation band (30-44) so no complexion looks airbrushed next to its neighbour; 'as-shot' carries the master's own measured numbers and is copied, never edited. 'fair' (190/24) was dropped on the shop's instruction: 6 cards, and the palest re-toned rung reads cooler and flatter than they wanted.",
+ "gate": {
+  "skinS_min": 18,
+  "skinS_max": 52,
+  "tolerance_L": 15,
+  "neighbour_min_gap": 8
+ },
+ "tones": {
+  "light-warm": {
+   "rank": 1,
+   "skinL": 178.0,
+   "skinS": 30.0,
+   "desc": "fair to light, soft warm beige, no orange",
+   "file": "light-warm"
+  },
+  "light-tan": {
+   "rank": 2,
+   "skinL": 164.0,
+   "skinS": 35.0,
+   "desc": "light tan, natural medium, the catalogue's base complexion",
+   "file": "light-tan"
+  },
+  "medium-brown": {
+   "rank": 3,
+   "skinL": 148.0,
+   "skinS": 38.0,
+   "desc": "warm medium brown, the most common shade in the market",
+   "file": "medium-brown"
+  },
+  "as-shot": {
+   "rank": 4,
+   "skinL": 138.0,
+   "skinS": 96.0,
+   "desc": "the master itself - the model's own wheat-olive complexion, untouched",
+   "file": "as-shot",
+   "as_shot": true
+  },
+  "deep": {
+   "rank": 5,
+   "skinL": 130.0,
+   "skinS": 41.0,
+   "desc": "deep brown, still warm and clear, never muddy",
+   "file": "deep"
+  },
+  "ebony": {
+   "rank": 6,
+   "skinL": 114.0,
+   "skinS": 44.0,
+   "desc": "rich dark brown; the darkest the shop shows, stops short of charcoal",
+   "file": "ebony"
+  }
+ },
+ "picker_order": {
+  "order": [
+   "as-shot",
+   "light-warm",
+   "light-tan",
+   "medium-brown",
+   "deep",
+   "ebony"
+  ],
+  "why": "decided by the shop owner 2026-09-06: the customer's own photo first, then light to dark. Nothing in the pipeline sorts by this key - the gates still use rank (lightness), so the neighbour-gap check stays physics, not merchandising."
+ },
+ "_ladder_checks": {
+  "L_steps": [
+   14,
+   16,
+   26,
+   -8,
+   -16
+  ],
+  "note": "light-warm 178 -> light-tan 164 -> medium-brown 148 -> as-shot 138 -> deep 130 -> ebony 114; as-shot is the source photo, so its lightness sits inside the ladder rather than at an end"
+ }
+}

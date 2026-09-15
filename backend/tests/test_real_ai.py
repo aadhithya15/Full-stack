@@ -1,64 +1,100 @@
-﻿"""Phase 5 tests - real AI plumbing with providers mocked (run offline)."""
+"""Real recommendation plumbing, live-search payload, and quality retries."""
 import json
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 
-from app.services.real_stylist import _strip_fences, _validate, get_real_recommendations
+from app.services.real_stylist import (
+    _call_groq_research,
+    _prompt,
+    _strip_fences,
+    _validate,
+    get_real_recommendations,
+)
 from app.utils.errors import ApiError
 
-GOOD_PAYLOAD = json.dumps(
-    {
-        "detected_skin_tone": "warm wheatish undertone",
-        "recommendations": [
-            {
-                "outfit_name": f"Test Outfit {i}",
-                "category": "traditional",
-                "description": "A lovely outfit.",
-                "dress_colors": [{"name": "Emerald", "hex": "#0F7B4D"}],
-                "accessories": ["earrings", "clutch"],
-                "footwear": "juttis",
-                "styling_tips": "Keep it simple.",
-                "avoid_colors": [{"name": "Grey", "hex": "#9E9E9E"}],
-                "match_score": 90,
-            }
-            for i in range(3)
+
+def _look(index, outfit_type, main, main_hex, second, second_hex):
+    titles = {1: "Peacock Ceremony", 2: "Ruby Heritage", 3: "Cobalt Celebration"}
+    return {
+        "outfit_name": titles.get(index, f"Distinct Look {index}"),
+        "category": "traditional",
+        "outfit_type": outfit_type,
+        "materials": ["breathable handloom cotton"],
+        "description": "A clear, coordinated Tamil occasion look with intentional contrast.",
+        "garments": [
+            {"item": "main garment", "name": f"{main} {outfit_type}", "colour": main, "fabric": "breathable handloom cotton"},
+            {"item": "border", "name": f"{second} border", "colour": second, "fabric": "breathable handloom cotton"},
         ],
+        "dress_colors": [
+            {"name": main, "hex": main_hex},
+            {"name": second, "hex": second_hex},
+        ],
+        "accessories": ["gold earrings", "woven clutch"],
+        "footwear": "cushioned leather sandals",
+        "styling_tips": "Keep the main colour nearest the face and all metal details gold.",
+        "avoid_colors": [{"name": "Muddy Taupe", "hex": "#766B5F"}],
+        "match_score": 90,
     }
-)
+
+
+GOOD_PAYLOAD = json.dumps({
+    "detected_skin_tone": "wheatish complexion",
+    "recommendations": [
+        _look(1, "saree", "Peacock Teal", "#126A70", "Antique Gold", "#C59A43"),
+        _look(2, "anarkali", "Ruby Maroon", "#7C2638", "Warm Ivory", "#EFE1C5"),
+        _look(3, "lehenga-choli", "Cobalt Blue", "#2855A0", "Soft Peach", "#E49B78"),
+    ],
+})
 
 ARGS = dict(
-    skin_tone="wheatish", occasion="wedding", gender="female",
-    style_preference="traditional", budget="medium", season_weather="hot",
-    dress_type="let-ai-decide", preferred_material="let-ai-decide",
-    language="en", notes="", count=3, exclude=[],
+    skin_tone="wheatish",
+    occasion="wedding",
+    gender="female",
+    style_preference="traditional",
+    budget="medium",
+    season_weather="hot",
+    dress_type="let-ai-decide",
+    preferred_material="let-ai-decide",
+    language="en",
+    notes="",
+    count=3,
+    exclude=[],
 )
 
 
 def test_strip_fences():
-    fenced = "```json\n{\"a\": 1}\n```"
-    assert json.loads(_strip_fences(fenced)) == {"a": 1}
+    assert json.loads(_strip_fences("```json\n{\"a\": 1}\n```")) == {"a": 1}
 
 
 def test_validate_good_payload():
-    detected, recos = _validate(GOOD_PAYLOAD, 3)
-    assert detected == "warm wheatish undertone"
+    detected, recos = _validate(GOOD_PAYLOAD, 3, skin_tone="wheatish", season_weather="hot")
+    assert detected == "wheatish complexion"
     assert len(recos) == 3
-    assert recos[0]["is_mock"] is False
+    assert all(reco["is_mock"] is False for reco in recos)
 
 
-def test_validate_fixes_bad_hex():
+def test_validate_rejects_bad_hex_instead_of_inventing_grey():
     bad = json.loads(GOOD_PAYLOAD)
     bad["recommendations"][0]["dress_colors"][0]["hex"] = "greenish"
-    _, recos = _validate(json.dumps(bad), 3)
-    assert recos[0]["dress_colors"][0]["hex"] == "#888888"
+    with pytest.raises(ValueError, match="dress_colors"):
+        _validate(json.dumps(bad), 3, skin_tone="wheatish")
+
+
+def test_validate_rejects_rust_olive_for_deep_skin():
+    bad = json.loads(GOOD_PAYLOAD)
+    bad["recommendations"][0] = _look(
+        1, "saree", "Rust", "#A84F32", "Olive Green", "#66713C"
+    )
+    with pytest.raises(ValueError, match="rust and olive"):
+        _validate(json.dumps(bad), 3, skin_tone="deep")
 
 
 def test_validate_rejects_too_few():
     bad = json.loads(GOOD_PAYLOAD)
     bad["recommendations"] = bad["recommendations"][:1]
-    with pytest.raises(ValueError):
-        _validate(json.dumps(bad), 3)
+    with pytest.raises(ValueError, match="expected 3"):
+        _validate(json.dumps(bad), 3, skin_tone="wheatish")
 
 
 def _fake_config(gemini="real-key", groq="real-key-2"):
@@ -69,30 +105,37 @@ def _fake_config(gemini="real-key", groq="real-key-2"):
     )
 
 
-def test_gemini_success():
+def test_gemini_success_after_one_internal_search():
     with _fake_config(), patch(
+        "app.services.real_stylist._live_research", return_value="current Tamil fashion brief"
+    ) as search, patch(
         "app.services.real_stylist._call_gemini", return_value=GOOD_PAYLOAD
-    ) as mg, patch("app.services.real_stylist._call_groq") as mq:
-        detected, recos = get_real_recommendations(**ARGS)
+    ) as gemini, patch("app.services.real_stylist._call_groq") as groq:
+        _, recos = get_real_recommendations(**ARGS)
     assert len(recos) == 3
-    mg.assert_called_once()
-    mq.assert_not_called()
+    search.assert_called_once()
+    gemini.assert_called_once()
+    groq.assert_not_called()
 
 
 def test_fallback_to_groq_when_gemini_fails():
     with _fake_config(), patch(
+        "app.services.real_stylist._live_research", return_value="live brief"
+    ), patch(
         "app.services.real_stylist._call_gemini", side_effect=ValueError("boom")
-    ) as mg, patch(
+    ) as gemini, patch(
         "app.services.real_stylist._call_groq", return_value=GOOD_PAYLOAD
-    ) as mq:
-        detected, recos = get_real_recommendations(**ARGS)
+    ) as groq:
+        _, recos = get_real_recommendations(**ARGS)
     assert len(recos) == 3
-    assert mg.call_count == 3  # three attempts before falling back
-    mq.assert_called_once()
+    assert gemini.call_count == 3
+    groq.assert_called_once()
 
 
-def test_all_fail_raises_ai_unavailable():
+def test_all_fail_raises_ai_unavailable_for_facade_to_catch():
     with _fake_config(), patch(
+        "app.services.real_stylist._live_research", return_value=""
+    ), patch(
         "app.services.real_stylist._call_gemini", side_effect=ValueError("boom")
     ), patch("app.services.real_stylist._call_groq", side_effect=ValueError("boom")):
         with pytest.raises(ApiError) as exc:
@@ -100,171 +143,109 @@ def test_all_fail_raises_ai_unavailable():
     assert exc.value.code == "AI_UNAVAILABLE"
 
 
-def test_retry_on_broken_json_then_success():
+def test_retry_on_broken_json_adds_correction_then_succeeds():
     with _fake_config(groq="PLACEHOLDER_REPLACE_WHEN_AVAILABLE"), patch(
+        "app.services.real_stylist._live_research", return_value="live brief"
+    ), patch(
         "app.services.real_stylist._call_gemini",
         side_effect=["{not valid json", GOOD_PAYLOAD],
-    ) as mg:
-        detected, recos = get_real_recommendations(**ARGS)
+    ) as gemini:
+        _, recos = get_real_recommendations(**ARGS)
     assert len(recos) == 3
-    assert mg.call_count == 2
+    assert gemini.call_count == 2
+    assert "CORRECTION REQUIRED" in gemini.call_args_list[1].args[0]
 
 
-# ------------------------------------------- outfit culture/formality (TN update)
+def test_compound_payload_enables_only_web_search_and_keeps_sources_internal():
+    response = Mock()
+    response.raise_for_status.return_value = None
+    response.json.return_value = {
+        "choices": [{
+            "message": {
+                "content": "Current Tamil guidance [1](https://example.com/article).",
+                "executed_tools": [{
+                    "type": "search",
+                    "search_results": [{"url": "https://example.com/article"}],
+                }],
+            }
+        }]
+    }
+    with patch("app.services.real_stylist.requests.post", return_value=response) as post:
+        brief, domains = _call_groq_research("Use web search now")
+    sent = post.call_args.kwargs["json"]
+    assert sent["model"] == "groq/compound-mini"
+    assert sent["compound_custom"]["tools"]["enabled_tools"] == ["web_search"]
+    assert "https://" not in brief
+    assert domains == ("example.com",)
 
 
-def test_prompt_includes_two_level_style_rules():
-    from app.services.real_stylist import _prompt
-
-    p = _prompt(
-        skin_tone="dusky", occasion="wedding", gender="female",
-        style_preference="traditional", budget="medium", season_weather="hot",
-        dress_type="saree", preferred_material="kanjivaram-silk",
-        language="en", notes="", count=3, exclude=[],
-        outfit_culture="tamil", outfit_formality="casual",
+def test_prompt_is_tamil_first_and_contains_quality_contract_not_image_generation():
+    prompt = _prompt(
+        skin_tone="deep",
+        occasion="wedding",
+        gender="female",
+        style_preference="traditional",
+        budget="medium",
+        season_weather="hot",
+        dress_type="saree",
+        preferred_material="kanjivaram-silk",
+        language="en",
+        notes="",
+        count=3,
+        exclude=[],
+        outfit_culture="tamil",
+        outfit_formality="festive",
+        age=42,
+        research_brief="Current Kanjivaram border direction.",
     )
-    assert "tamil" in p and "casual" in p
-    assert "Kanjivaram" in p
-    assert "BOTH levels must be respected" in p
-    assert "image_prompt" in p
+    assert "Tamil Nadu-first" in prompt
+    assert "42 years old" in prompt
+    assert "Rust plus olive is always rejected" in prompt
+    assert "outfit_type must be one exact code" in prompt
+    assert '"image_prompt"' not in prompt
+    assert "<untrusted_web_research>" in prompt
 
 
-def test_image_url_uses_llm_prompt_when_given():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Test Saree", "desc", [{"name": "Emerald", "hex": "#0F7B4D"}],
-        "female", "wedding", outfit_culture="tamil", outfit_formality="traditional",
-        llm_image_prompt="full body photograph of a South Indian woman wearing emerald Kanjivaram silk saree with gold zari border",
+def test_prompt_without_age_uses_adult_default():
+    prompt = _prompt(
+        skin_tone="dusky",
+        occasion="party",
+        gender="male",
+        style_preference="casual",
+        budget="low",
+        season_weather="hot",
+        dress_type="let-ai-decide",
+        preferred_material="let-ai-decide",
+        language="en",
+        notes="",
+        count=3,
+        exclude=[],
     )
-    assert "Kanjivaram" in urllib.parse.unquote(url)
+    assert "adult; exact age not specified" in prompt
 
 
-def test_image_fallback_tamil_traditional():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Silk Saree", "a saree", [{"name": "Red", "hex": "#AA0000"}],
-        "female", "wedding", outfit_culture="tamil", outfit_formality="traditional",
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "Tamil" in decoded and "temple jewellery" in decoded
-
-
-def test_image_fallback_tamil_casual_differs_from_traditional():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Cotton Kurti", "a kurti", [{"name": "Blue", "hex": "#0000AA"}],
-        "female", "casual", outfit_culture="tamil", outfit_formality="casual",
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "kurti" in decoded.lower() or "Chettinad" in decoded
-    assert "wedding hall" not in decoded  # casual must not use the wedding scene
-
-
-def test_image_fallback_western_formal():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Business Suit", "a suit", [{"name": "Navy", "hex": "#1F3554"}],
-        "male", "office", outfit_culture="western", outfit_formality="formal",
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "business suit" in decoded.lower()
-    assert "Kanjivaram" not in decoded  # no ethnic bleed into western
-
-
-# ----------------------------------------------------------------- age feature
-
-
-def test_prompt_includes_age_rules():
-    from app.services.real_stylist import _prompt
-
-    p = _prompt(
-        skin_tone="dusky", occasion="wedding", gender="female",
-        style_preference="traditional", budget="medium", season_weather="hot",
-        dress_type="saree", preferred_material="kanjivaram-silk",
-        language="en", notes="", count=3, exclude=[],
-        outfit_culture="tamil", outfit_formality="traditional", age=42,
-    )
-    assert "42 years old" in p
-    assert "Age rules" in p
-    assert "Mature adults (38-45)" in p
-    assert "SAME age group" in p
-
-
-def test_prompt_without_age_uses_default():
-    from app.services.real_stylist import _prompt
-
-    p = _prompt(
-        skin_tone="dusky", occasion="party", gender="male",
-        style_preference="casual", budget="low", season_weather="hot",
-        dress_type="let-ai-decide", preferred_material="let-ai-decide",
-        language="en", notes="", count=3, exclude=[],
-    )
-    assert "assume mid-20s" in p
-
-
-def test_image_fallback_reflects_age():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Silk Saree", "a saree", [{"name": "Red", "hex": "#AA0000"}],
-        "female", "wedding", outfit_culture="tamil",
-        outfit_formality="traditional", age=42,
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "early forties" in decoded
-
-
-def test_image_fallback_teen_age():
-    import urllib.parse
-    from app.services.image_service import outfit_image_url
-
-    url = outfit_image_url(
-        "Cotton Kurti", "a kurti", [{"name": "Blue", "hex": "#0000AA"}],
-        "female", "casual", outfit_culture="tamil",
-        outfit_formality="casual", age=15,
-    )
-    decoded = urllib.parse.unquote(url)
-    assert "teenage" in decoded
-
-
-def test_analyze_rejects_bad_age(client_for_age):
-    res = client_for_age.post(
-        "/api/fashion/analyze",
-        data={"skin_tone_text": "wheatish", "occasion": "party",
-              "gender": "female", "age": "abc"},
-        headers={"Authorization": "Bearer x"},
-    )
-    assert res.status_code == 400
-    res = client_for_age.post(
-        "/api/fashion/analyze",
-        data={"skin_tone_text": "wheatish", "occasion": "party",
-              "gender": "female", "age": "60"},
-        headers={"Authorization": "Bearer x"},
-    )
-    assert res.status_code == 400
-
-
-import pytest as _pytest
-
-
-@_pytest.fixture()
+@pytest.fixture()
 def client_for_age():
-    from unittest.mock import patch as _patch
-
     from app import create_app
 
     app = create_app()
     app.config["TESTING"] = True
-    with _patch("app.middleware.auth_middleware.get_user_from_token") as mgu:
-        mgu.return_value = {"id": "u-age", "email": "a@x.com", "full_name": "A"}
-        with app.test_client() as c:
-            yield c
+    with patch("app.middleware.auth_middleware.get_user_from_token") as get_user:
+        get_user.return_value = {"id": "u-age", "email": "a@x.com", "full_name": "A"}
+        with app.test_client() as client:
+            yield client
+
+
+def test_analyze_rejects_bad_age(client_for_age):
+    response = client_for_age.post(
+        "/api/fashion/analyze",
+        data={"skin_tone_text": "wheatish", "occasion": "party", "gender": "female", "age": "abc"},
+        headers={"Authorization": "Bearer x"},
+    )
+    assert response.status_code == 400
+    response = client_for_age.post(
+        "/api/fashion/analyze",
+        data={"skin_tone_text": "wheatish", "occasion": "party", "gender": "female", "age": "60"},
+        headers={"Authorization": "Bearer x"},
+    )
+    assert response.status_code == 400

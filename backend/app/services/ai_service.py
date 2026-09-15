@@ -1,21 +1,22 @@
-﻿"""AI recommendation facade.
+"""Recommendation facade with an availability-preserving quality floor.
 
-ONE public function: get_recommendations(...).
-  - Mock mode (AI keys are placeholders): uses mock_stylist. Everything
-    works end-to-end ? auth, DB, images ? with realistic varied content.
-  - Real mode (Phase 5): calls Gemini (primary) / Groq (fallback) and
-    parses strict JSON. Same return shape; routes never change.
-
-Return: (detected_skin_tone: str, recommendations: list[dict])
-Each recommendation dict has: outfit_name, category, description,
-dress_colors, accessories, footwear, styling_tips, avoid_colors,
-match_score, is_mock  ? image_url is added by the route (image_service).
+The route calls one function and keeps one response contract. Real provider
+failures, malformed JSON, failed web search, or rejected colour palettes all
+fall back to the same curated six-tone stylist rather than returning a 5xx.
 """
 from __future__ import annotations
+
+import logging
 
 from app.config import Config
 from app.services.mock_stylist import generate_mock_recommendations
 from app.utils.errors import ApiError
+
+log = logging.getLogger(__name__)
+
+
+def _curated_fallback(**kwargs) -> tuple[str, list[dict]]:
+    return generate_mock_recommendations(**kwargs)
 
 
 def get_recommendations(
@@ -36,58 +37,33 @@ def get_recommendations(
     exclude: list[str] | None = None,
 ) -> tuple[str, list[dict]]:
     exclude = exclude or []
+    fallback_args = {
+        "skin_tone": skin_tone,
+        "occasion": occasion,
+        "gender": gender,
+        "style_preference": style_preference,
+        "budget": budget,
+        "season_weather": season_weather,
+        "dress_type": dress_type,
+        "preferred_material": preferred_material,
+        "outfit_culture": outfit_culture,
+        "outfit_formality": outfit_formality,
+        "age": age,
+        "language": language,
+        "notes": notes,
+        "count": count,
+        "exclude": exclude,
+    }
 
     if Config.ai_mock_mode():
-        return generate_mock_recommendations(
-            skin_tone=skin_tone,
-            occasion=occasion,
-            gender=gender,
-            style_preference=style_preference,
-            budget=budget,
-            season_weather=season_weather,
-            dress_type=dress_type,
-            preferred_material=preferred_material,
-            language=language,
-            count=count,
-            exclude=exclude,
-        )
+        return _curated_fallback(**fallback_args)
 
-    # Real mode: Gemini (primary) -> Groq (fallback), strict JSON.
     from app.services.real_stylist import get_real_recommendations
 
     try:
-        return get_real_recommendations(
-            skin_tone=skin_tone,
-            occasion=occasion,
-            gender=gender,
-            style_preference=style_preference,
-            outfit_culture=outfit_culture,
-            outfit_formality=outfit_formality,
-            age=age,
-            budget=budget,
-            season_weather=season_weather,
-            dress_type=dress_type,
-            preferred_material=preferred_material,
-            language=language,
-            notes=notes,
-            count=count,
-            exclude=exclude,
-        )
-    except ApiError:
-        raise
-    except Exception:
-        # Absolute last resort: never give the user a hard failure when the
-        # mock stylist can still produce a usable answer.
-        return generate_mock_recommendations(
-            skin_tone=skin_tone,
-            occasion=occasion,
-            gender=gender,
-            style_preference=style_preference,
-            budget=budget,
-            season_weather=season_weather,
-            dress_type=dress_type,
-            preferred_material=preferred_material,
-            language=language,
-            count=count,
-            exclude=exclude,
-        )
+        return get_real_recommendations(**fallback_args)
+    except ApiError as exc:
+        log.warning("real stylist unavailable (%s); using curated fallback", exc.code)
+    except Exception as exc:
+        log.exception("unexpected real stylist failure; using curated fallback: %s", exc)
+    return _curated_fallback(**fallback_args)
